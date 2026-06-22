@@ -1,0 +1,536 @@
+/* ─── Layout ─────────────────────────────────────────────────── */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #1a2b2b;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #e8edf0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+}
+
+.sidebarLogo {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 19px;
+  font-weight: 800;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-style: normal;
+  letter-spacing: -0.5px;
+  background: #fff;
+  border-bottom: 1px solid #e8edf0;
+}
+.logoD { color: #0d2020; }
+.logoA { color: #0b7b7b; }
+
+.sidebarSection { padding: 16px 0 4px; }
+
+.sidebarLabel {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #9aadad;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 18px 6px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  border-radius: 0;
+  cursor: pointer;
+  color: #4a6060;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.navItem:hover { background: #f0f7f7; color: #0b7b7b; }
+
+.navItemActive {
+  background: #0b7b7b;
+  color: #fff;
+  border-radius: 8px;
+  margin: 0 8px;
+  padding: 9px 10px;
+  width: calc(100% - 16px);
+}
+
+.navItemActive:hover { background: #0a6b6b; color: #fff; }
+
+.navIcon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.75; }
+.navItemActive .navIcon { opacity: 1; }
+.sidebarSpacer { flex: 1; }
+.sidebarFooter { border-top: 1px solid #f0f4f4; padding: 8px 0; }
+
+/* ─── Main ────────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* ─── Topbar ──────────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  height: 58px;
+  background: #cde9e6;
+  border-bottom: 1px solid #b0d8d4;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.breadcrumb {
+  font-size: 13.5px;
+  color: #6a8080;
+}
+
+.breadcrumb strong { color: #1a2b2b; }
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnAddLearner {
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnAddLearner:hover { background: #0a6b6b; }
+
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: none;
+  background: #f4f6f8;
+  color: #4a6060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.iconBtn svg { width: 16px; height: 16px; }
+.iconBtn:hover { background: #e8edf0; }
+
+.avatarBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: none;
+  background: #0b7b7b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ─── Content ─────────────────────────────────────────────────── */
+.content {
+  padding: 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ─── Form card ───────────────────────────────────────────────── */
+.formCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 28px 28px 24px;
+}
+
+.pageTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0 0 24px;
+}
+
+.formRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.formLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6a8080;
+  text-transform: none;
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+/* floating avatar stack above the select */
+.avatarStack {
+  display: flex;
+  position: absolute;
+  top: -18px;
+  left: 8px;
+  z-index: 2;
+}
+
+.avatarChip {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #0b7b7b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  margin-left: -6px;
+}
+
+.avatarChip:first-child { margin-left: 0; }
+
+.selectBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border: 1px solid #d8e4e4;
+  border-radius: 8px;
+  background: #fff;
+  min-width: 190px;
+  cursor: pointer;
+}
+
+.selectPlaceholder {
+  font-size: 13px;
+  color: #9aadad;
+}
+
+.selectChevron {
+  color: #9aadad;
+  display: flex;
+  align-items: center;
+}
+
+.selectChevron svg { width: 14px; height: 14px; }
+
+/* Notify toggle */
+.notifyToggle {
+  display: flex;
+  border: 1.5px solid #d8e4e4;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.notifyOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  background: #fff;
+  color: #6a8080;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex: 1;
+  justify-content: center;
+}
+
+.notifyOption + .notifyOption {
+  border-left: 1.5px solid #d8e4e4;
+}
+
+.notifyOption:hover {
+  background: #f0f7f7;
+  color: #0b7b7b;
+}
+
+.notifyOptionActive {
+  background: #0b7b7b;
+  color: #fff;
+}
+
+.notifyOptionActive:hover {
+  background: #0a6b6b;
+}
+
+.notifyIcon { width: 15px; height: 15px; display: flex; align-items: center; }
+.notifyIcon svg { width: 15px; height: 15px; }
+
+/* Assign button row */
+.assignBtnWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.avatarStackSm {
+  display: flex;
+  position: relative;
+}
+
+.avatarChipSm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0b7b7b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+.btnAssign {
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 22px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnAssign:hover { background: #0a6b6b; }
+
+/* ─── Table card ──────────────────────────────────────────────── */
+.tableCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 24px 0 8px;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0 0 16px;
+  padding: 0 24px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #9aadad;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 24px;
+  text-align: left;
+  border-bottom: 1px solid #f0f4f4;
+}
+
+.tr { background: #fff; }
+.trAlt { background: #f9fbfb; }
+
+.td {
+  padding: 13px 24px;
+  font-size: 13.5px;
+  color: #1a2b2b;
+  font-weight: 500;
+}
+
+.tdAction {
+  padding: 13px 16px;
+  text-align: right;
+  width: 48px;
+}
+
+.trashBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #c0cccc;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.trashBtn:hover { color: #e04040; background: #fef2f2; }
+.trashBtn svg { width: 15px; height: 15px; }
+
+/* ─── Progress badges ─────────────────────────────────────────── */
+.progressBadge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.progressGreen  { background: #e6f7f0; color: #0b8a5a; }
+.progressYellow { background: #fef9e6; color: #b08a00; }
+.progressOrange { background: #fff0e6; color: #c06010; }
+.progressRed    { background: #fde8e8; color: #c03030; }
+
+/* ─── Native select ───────────────────────────────────────────── */
+.formSelect {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d8e4e4;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  color: #1a2b2b;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='%239aadad' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
+  padding-right: 34px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.formSelect:focus { border-color: #0b7b7b; }
+.formSelect:disabled { background: #f4f6f8; color: #9aadad; cursor: not-allowed; }
+
+/* ─── Skeleton row ────────────────────────────────────────────── */
+.skeletonRow {
+  height: 18px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f4f4 25%, #e8f0f0 50%, #f0f4f4 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Disabled assign button ──────────────────────────────────── */
+.btnAssign:disabled { background: #9aadad; cursor: not-allowed; }
+
+/* ─── Confirm modal ───────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 30, 30, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modalBox {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+}
+
+.modalTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin-bottom: 12px;
+}
+
+.modalBody {
+  font-size: 13.5px;
+  color: #4a6060;
+  line-height: 1.7;
+  margin: 0 0 24px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.modalBtnCancel {
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: 1.5px solid #d8e4e4;
+  background: #fff;
+  color: #4a6060;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modalBtnCancel:hover { background: #f4f6f8; }
+
+.modalBtnDelete {
+  padding: 9px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #e04040;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modalBtnDelete:hover { background: #c53030; }

@@ -1,0 +1,210 @@
+/* ─── Page header ──────────────────────────────────────────────── */
+.headerRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.headerLeft {}
+.pageTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+.pageSubtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.backBtn {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+.backBtn:hover { background: #f3f4f6; }
+.backBtn svg { width: 16px; height: 16px; }
+.btnEdit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #d97706;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btnEdit:hover { background: #b45309; }
+.btnEdit svg { width: 15px; height: 15px; }
+
+/* ─── Profile card ─────────────────────────────────────────────── */
+.profileCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.avatar {
+  width: 64px;
+  height: 64px;
+  background: #e0f2f1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.avatar svg { width: 32px; height: 32px; color: #0b7b7b; }
+.profileInfo { flex: 1; min-width: 0; }
+.profileName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 4px;
+}
+.profileEmail {
+  font-size: 13.5px;
+  color: #6b7280;
+  margin: 0 0 8px;
+}
+.profileBadges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.badgeType {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: #e5e7eb;
+  color: #374151;
+  white-space: nowrap;
+}
+.badgeType_superadmin   { background: #ede9fe; color: #6d28d9; }
+.badgeType_creator      { background: #fef3c7; color: #92400e; }
+.badgeType_organization { background: #dbeafe; color: #1d4ed8; }
+.badgeType_employee     { background: #d1fae5; color: #065f46; }
+.badgeActive {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: #dcfce7;
+  color: #16a34a;
+}
+.badgeInactive {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 600;
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* ─── Sections ─────────────────────────────────────────────────── */
+.sectionCard {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  cursor: pointer;
+  user-select: none;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+.sectionHeader:hover { background: #f3f4f6; }
+.sectionHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+.sectionHeaderLeft svg { width: 16px; height: 16px; flex-shrink: 0; }
+.chevron { font-size: 11px; color: #9ca3af; transition: transform 0.18s; }
+.chevronDown { transform: rotate(180deg); }
+.sectionBody { padding: 20px; }
+
+/* ─── Info grid ─────────────────────────────────────────────────── */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px 24px;
+}
+.infoItem {}
+.infoLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.infoValue {
+  font-size: 14px;
+  color: #111827;
+  word-break: break-word;
+}
+.infoValueMuted { font-size: 14px; color: #9ca3af; font-style: italic; }
+.infoValueFull {
+  grid-column: 1 / -1;
+}
+.bioText {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.socialLink {
+  color: #0b7b7b;
+  text-decoration: none;
+  font-size: 14px;
+  word-break: break-all;
+}
+.socialLink:hover { text-decoration: underline; }
+
+/* ─── Loading / not found ────────────────────────────────────────── */
+.loading { padding: 40px; color: #6b7280; font-size: 14px; }
+.notFound { padding: 40px; color: #dc2626; font-size: 14px; }

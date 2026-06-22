@@ -1,0 +1,507 @@
+/* ─── Layout (mirrors OrgDashboard shell) ───────────────────────── */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #1a2b2b;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #e8edf0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+}
+
+.sidebarLogo {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 19px;
+  font-weight: 800;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-style: normal;
+  letter-spacing: -0.5px;
+  background: #fff;
+  border-bottom: 1px solid #e8edf0;
+}
+.logoD { color: #0d2020; }
+.logoA { color: #0b7b7b; }
+
+.sidebarSection {
+  padding: 16px 0 4px;
+}
+
+.sidebarLabel {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #9aadad;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 18px 6px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  border-radius: 0;
+  cursor: pointer;
+  color: #4a6060;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.navItem:hover {
+  background: #f0f7f7;
+  color: #0b7b7b;
+}
+
+.navItemActive {
+  background: #0b7b7b;
+  color: #fff;
+  border-radius: 8px;
+  margin: 0 8px;
+  padding: 9px 10px;
+  width: calc(100% - 16px);
+}
+
+.navItemActive:hover {
+  background: #0a6b6b;
+  color: #fff;
+}
+
+.navIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.navItemActive .navIcon {
+  opacity: 1;
+}
+
+.sidebarSpacer { flex: 1; }
+
+.sidebarFooter {
+  border-top: 1px solid #f0f4f4;
+  padding: 8px 0;
+}
+
+/* ─── Main area ───────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* ─── Top bar ────────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  height: 58px;
+  background: #cde9e6;
+  border-bottom: 1px solid #b0d8d4;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.breadcrumb {
+  font-size: 13.5px;
+  color: #7a9090;
+}
+
+.breadcrumb strong {
+  color: #1a2b2b;
+  font-weight: 600;
+}
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid #e8edf0;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a6060;
+  padding: 0;
+}
+
+.iconBtn svg { width: 16px; height: 16px; }
+.iconBtn:hover { background: #f0f7f7; }
+
+.avatarBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Page content ───────────────────────────────────────────── */
+.content {
+  padding: 24px;
+}
+
+/* ─── Side-by-side sections row ─────────────────────────────── */
+.sectionsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin-bottom: 20px;
+}
+
+/* ─── Section cards ──────────────────────────────────────────── */
+.section {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 24px;
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f4f4;
+}
+
+.subSectionDivider {
+  border: none;
+  border-top: 1px solid #e8edf0;
+  margin: 22px 0 0;
+}
+
+.subSectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #0b7b7b;
+  background: #e8f5f5;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin: 10px 0 12px;
+}
+
+/* ─── Form grid ──────────────────────────────────────────────── */
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+/* Single-column stack used inside side-by-side sections */
+.fieldCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4a6060;
+}
+
+.input,
+.textarea {
+  border: 1px solid #d4dee0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13.5px;
+  color: #1a2b2b;
+  background: #fff;
+  transition: border-color 0.15s;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: #0b7b7b;
+  box-shadow: 0 0 0 3px rgba(11,123,123,0.08);
+}
+
+.input:disabled {
+  background: #f4f6f8;
+  color: #7a9090;
+  cursor: not-allowed;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 90px;
+  font-family: inherit;
+}
+
+/* ─── Status bar ─────────────────────────────────────────────── */
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.statusSuccess {
+  background: #edf7f3;
+  color: #0b6e4f;
+  border: 1px solid #b5e0cc;
+}
+
+.statusError {
+  background: #fff1f1;
+  color: #b91c1c;
+  border: 1px solid #fbc5c5;
+}
+
+/* ─── Actions row ────────────────────────────────────────────── */
+.actionsRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btnSave {
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnSave:hover { background: #0a6b6b; }
+.btnSave:disabled { background: #7ab8b8; cursor: not-allowed; }
+
+.btnCancel {
+  background: #fff;
+  color: #4a6060;
+  border: 1px solid #d4dee0;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnCancel:hover { background: #f4f6f8; }
+
+/* ─── Loading skeleton ───────────────────────────────────────── */
+.skeletonRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.skeletonLine {
+  height: 14px;
+  background: linear-gradient(90deg, #e8edf0 25%, #f4f6f8 50%, #e8edf0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 6px;
+}
+
+.skeletonInput {
+  height: 38px;
+  background: linear-gradient(90deg, #e8edf0 25%, #f4f6f8 50%, #e8edf0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Main content two-column row ───────────────────────────── */
+.contentRow {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* ─── Store Profile form card ────────────────────────────────── */
+.formCard {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 28px 28px 20px;
+}
+
+.cardTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin-bottom: 20px;
+}
+
+.formActions {
+  margin-top: 24px;
+}
+
+/* ─── Notification preferences card ─────────────────────────── */
+.notifCard {
+  width: 240px;
+  flex-shrink: 0;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 24px 20px;
+}
+
+.notifItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f4f6f8;
+}
+
+.notifItem:last-child {
+  border-bottom: none;
+}
+
+.notifText {
+  flex: 1;
+  min-width: 0;
+}
+
+.notifLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a2b2b;
+  margin-bottom: 2px;
+}
+
+.notifDesc {
+  font-size: 11px;
+  color: #8a9a9a;
+  line-height: 1.4;
+}
+
+/* ─── Toggle switch ──────────────────────────────────────────── */
+.toggle {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 12px;
+  background: #d0d7db;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.toggleOn {
+  background: #0b7b7b;
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.2s;
+  pointer-events: none;
+  display: block;
+}
+
+.toggleOn .toggleThumb {
+  left: 21px;
+}
+
+/* ─── Add Learner button (topbar) ────────────────────────────── */
+.btnAddLearner {
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btnAddLearner:hover {
+  background: #096969;
+}
+

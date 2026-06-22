@@ -1,0 +1,1107 @@
+/* ─── Layout ─────────────────────────────────────────────────── */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #1a2b2b;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #e8edf0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+}
+
+.sidebarLogo {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 19px;
+  font-weight: 800;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-style: normal;
+  letter-spacing: -0.5px;
+  background: #fff;
+  border-bottom: 1px solid #e8edf0;
+}
+.logoD { color: #0d2020; }
+.logoA { color: #0b7b7b; }
+
+.sidebarSection { padding: 16px 0 4px; }
+
+.sidebarLabel {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #9aadad;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 18px 6px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  cursor: pointer;
+  color: #4a6060;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.navItem:hover { background: #f0f7f7; color: #0b7b7b; }
+
+.navItemActive {
+  background: #0b7b7b;
+  color: #fff;
+  border-radius: 8px;
+  margin: 0 8px;
+  padding: 9px 10px;
+  width: calc(100% - 16px);
+}
+
+.navItemActive:hover { background: #0a6b6b; color: #fff; }
+
+.navIcon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.75; }
+.navItemActive .navIcon { opacity: 1; }
+.sidebarSpacer { flex: 1; }
+.sidebarFooter { border-top: 1px solid #f0f4f4; padding: 8px 0; }
+
+/* ─── Main ────────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* ─── Topbar ──────────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  height: 58px;
+  background: #cde9e6;
+  border-bottom: 1px solid #b0d8d4;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.breadcrumb {
+  font-size: 13.5px;
+  color: #6a8080;
+}
+
+.breadcrumb strong { color: #1a2b2b; font-weight: 600; }
+
+.breadcrumbLink {
+  cursor: pointer;
+  color: #6a8080;
+}
+
+.breadcrumbLink:hover { color: #0b7b7b; text-decoration: underline; }
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnAddLearner {
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnAddLearner:hover { background: #0a6b6b; }
+
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: none;
+  background: #f4f6f8;
+  color: #4a6060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.iconBtn svg { width: 16px; height: 16px; }
+.iconBtn:hover { background: #e8edf0; }
+
+.avatarBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: none;
+  background: #0b7b7b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ─── Content ─────────────────────────────────────────────────── */
+.content {
+  padding: 24px 28px 0;
+  flex: 1;
+}
+
+/* ─── Page heading row ────────────────────────────────────────── */
+.pageHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pageHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0;
+}
+
+.planBadge {
+  background: #e6f7f7;
+  color: #0b7b7b;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #b2dede;
+}
+
+.pageHeadMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 13px;
+  color: #4a6060;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metaItem strong { color: #1a2b2b; font-weight: 700; }
+
+.metaIcon {
+  width: 16px;
+  height: 16px;
+  color: #0b7b7b;
+  display: flex;
+  align-items: center;
+}
+
+.metaIcon svg { width: 15px; height: 15px; }
+
+.metaDivider {
+  width: 1px;
+  height: 16px;
+  background: #d8e4e4;
+}
+
+/* ─── Stepper ─────────────────────────────────────────────────── */
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.stepperItem {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.stepperItem:last-child { flex: 0; }
+
+.stepCircle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e8edf0;
+  color: #9aadad;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid #e8edf0;
+}
+
+.stepCircleActive {
+  background: #0b7b7b;
+  color: #fff;
+  border-color: #0b7b7b;
+}
+
+.stepCircleDone {
+  background: #e6f7f7;
+  color: #0b7b7b;
+  border-color: #0b7b7b;
+}
+
+.stepLabel {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #9aadad;
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.stepLabelActive {
+  color: #0b7b7b;
+  font-weight: 700;
+}
+
+.stepLine {
+  flex: 1;
+  height: 1px;
+  background: #d8e4e4;
+  margin: 0 12px;
+}
+
+/* ─── Credits banner ──────────────────────────────────────────── */
+.creditsBanner {
+  background: #f0fafa;
+  border: 1px solid #b2dede;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  color: #1a2b2b;
+}
+
+.creditsBanner strong {
+  font-size: 14px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+  color: #0b7b7b;
+}
+
+.creditsBanner p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #4a7070;
+}
+
+/* ─── Form card ───────────────────────────────────────────────── */
+.formCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 24px 28px 28px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0 0 20px;
+}
+
+/* ─── Form grid ───────────────────────────────────────────────── */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+}
+
+/* 3-column row override via nth-child grouping */
+.formGrid > :nth-child(7),
+.formGrid > :nth-child(8),
+.formGrid > :nth-child(9) {
+  /* rows of 3: remove by making it a 3-col subgrid implicitly */
+}
+
+.formGrid.threeCol {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+/* ─── Field ───────────────────────────────────────────────────── */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #1a2b2b;
+}
+
+.req { color: #e04040; }
+
+.input {
+  border: 1px solid #d8e4e4;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: #1a2b2b;
+  background: #fff;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.input::placeholder { color: #b0c0c0; }
+.input:focus { border-color: #0b7b7b; }
+
+/* react-datepicker wrapper — fills the field column */
+.datePickerWrapper { width: 100%; }
+.datePickerWrapper :global(.react-datepicker-wrapper) { width: 100%; }
+.datePickerWrapper :global(.react-datepicker__input-container) { width: 100%; }
+
+.inputWithIcon {
+  position: relative;
+}
+
+.inputWithIcon .input { padding-right: 36px; }
+
+.inputIconRight {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9aadad;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.inputIconRight svg { width: 14px; height: 14px; }
+
+.fieldHint {
+  font-size: 11px;
+  color: #9aadad;
+  margin-top: 2px;
+}
+
+/* ─── Select ──────────────────────────────────────────────────── */
+.selectWrapper {
+  position: relative;
+}
+
+.select {
+  border: 1px solid #d8e4e4;
+  border-radius: 8px;
+  padding: 9px 36px 9px 12px;
+  font-size: 13px;
+  color: #1a2b2b;
+  background: #fff;
+  outline: none;
+  width: 100%;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.select:focus { border-color: #0b7b7b; }
+
+.selectChevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9aadad;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.selectChevron svg { width: 14px; height: 14px; }
+
+/* ─── 3-col rows ──────────────────────────────────────────────── */
+.threeColRow {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 18px 24px;
+}
+
+/* ─── Assign course row ───────────────────────────────────────── */
+.assignCourseRow {
+  margin-top: 20px;
+}
+
+.btnAssignCourse {
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btnAssignCourse:hover { background: #0a6b6b; }
+
+/* ─── Footer ──────────────────────────────────────────────────── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px 28px;
+  border-top: 1px solid #e8edf0;
+  background: #f4f6f8;
+}
+
+.btnCancel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #4a6060;
+  border: 1.5px solid #d8e4e4;
+  border-radius: 50px;
+  padding: 9px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btnCancel:hover { border-color: #0b7b7b; color: #0b7b7b; }
+
+.btnNext {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #0b7b7b;
+  border: 1.5px solid #0b7b7b;
+  border-radius: 50px;
+  padding: 9px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btnNext:hover { background: #0b7b7b; color: #fff; }
+
+.footerArrow {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e6f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b7b7b;
+  flex-shrink: 0;
+}
+
+.btnNext:hover .footerArrow { background: rgba(255,255,255,0.2); color: #fff; }
+
+.footerArrow svg { width: 14px; height: 14px; }
+
+/* ─── Step done (checkmark circle) ───────────────────────────── */
+.stepCircleCheck {
+  background: #e6f7f7;
+  color: #0b7b7b;
+  border-color: #0b7b7b;
+}
+
+/* ─── Select Courses card ─────────────────────────────────────── */
+.selectCoursesCard {
+  background: #f0fafa;
+  border: 1px solid #b2dede;
+  border-radius: 12px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+
+.selectCoursesCard strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b7b7b;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.selectCoursesCard p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #4a7070;
+}
+
+/* ─── Course list ─────────────────────────────────────────────── */
+.courseListCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 20px 22px 10px;
+  margin-bottom: 24px;
+}
+
+.courseListTitle {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0 0 14px;
+}
+
+.courseItem {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f4f4;
+  transition: background 0.12s;
+}
+
+.courseItem:last-child { border-bottom: none; }
+
+.courseItemTop {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+}
+
+.courseItemTop:hover .courseName { color: #0b7b7b; }
+
+.courseItemSelected { background: #f4fafa; margin: 0 -22px; padding: 14px 22px; }
+
+.courseCircleBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #b0c8c8;
+  background: #fff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: pointer;
+  padding: 0;
+}
+
+.courseCircleBtn:hover { border-color: #0b7b7b; }
+
+.courseCircleBtnSelected {
+  border-color: #0b7b7b;
+  background: #0b7b7b;
+}
+
+.courseCircleCheck {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.courseInfo { flex: 1; min-width: 0; }
+
+.courseName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a2b2b;
+  margin-bottom: 3px;
+}
+
+.courseMeta {
+  font-size: 12px;
+  color: #7a9a9a;
+}
+
+/* ─── Course pricing section ──────────────────────────────────── */
+.pricingSection {
+  margin-top: 10px;
+  padding-left: 34px;
+}
+
+.pricingLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #5a8a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.pricingOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pricingOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1.5px solid #d4e8e8;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color 0.15s, background 0.15s;
+  font-size: 13px;
+}
+
+.pricingOption input[type="radio"] { display: none; }
+
+.pricingOption:hover {
+  border-color: #0b7b7b;
+  background: #f4fafa;
+}
+
+.pricingOptionSelected {
+  border-color: #0b7b7b;
+  background: #eaf5f5;
+}
+
+.pricingSeats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #1a2b2b;
+}
+
+.pricingBadge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0b7b7b;
+  background: #d6f0f0;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.pricingPriceGroup {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pricingMrp {
+  font-size: 12px;
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.pricingPrice {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b7b7b;
+}
+
+/* ─── Floating avatar ─────────────────────────────────────────── */
+.floatingAvatar {
+  position: fixed;
+  bottom: 90px;
+  left: 240px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0b7b7b;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(11,123,123,0.35);
+  z-index: 100;
+}
+
+/* ─── Confirm step ────────────────────────────────────────────── */
+.confirmSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #f0f4f4;
+}
+
+.confirmSection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.confirmLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #9aadad;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.confirmValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a2b2b;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.confirmSub {
+  font-size: 12.5px;
+  color: #7a9a9a;
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+.confirmEmpty {
+  color: #b0c8c8;
+  font-style: italic;
+}
+
+.confirmCourseTag {
+  background: #e6f7f7;
+  color: #0b7b7b;
+  border: 1px solid #b2dede;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+}
+
+/* ─── Notify toggle (shared with assign-courses) ──────────────── */
+.notifyToggle {
+  display: flex;
+  border: 1.5px solid #d8e4e4;
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+}
+
+.notifyOption {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border: none;
+  background: #fff;
+  color: #4a6060;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex: 1;
+}
+
+.notifyOption:hover { background: #f0f7f7; }
+
+.notifyOptionActive {
+  background: #0b7b7b;
+  color: #fff;
+}
+
+.notifyOptionActive:hover { background: #0a6b6b; }
+
+.notifyIcon {
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.notifyIcon svg { width: 14px; height: 14px; }
+
+/* ─── Message preview ─────────────────────────────────────────── */
+.messagePreview {
+  background: #f4f6f8;
+  border: 1px solid #e8edf0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #4a6060;
+  line-height: 1.6;
+}
+
+/* ─── Notification preferences ────────────────────────────────── */
+.notifSubtitle {
+  font-size: 12.5px;
+  color: #9aadad;
+  margin: -12px 0 16px;
+}
+
+.notifRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f4f4;
+}
+
+.notifRow:last-child { border-bottom: none; }
+
+.notifInfo { flex: 1; min-width: 0; padding-right: 20px; }
+
+.notifLabel {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1a2b2b;
+  margin-bottom: 3px;
+}
+
+.notifDesc {
+  font-size: 12px;
+  color: #9aadad;
+}
+
+/* iOS-style toggle switch */
+.toggleSwitch {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #d8e4e4;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.toggleSwitchOn { background: #0b7b7b; }
+
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  transition: left 0.2s;
+}
+
+.toggleSwitchOn .toggleThumb { left: 23px; }
+
+/* ─── Confirm two-column layout ───────────────────────────────── */
+.confirmCols {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ─── Learner preview card ────────────────────────────────────── */
+.learnerPreviewCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.learnerAvatarCircle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #0b7b7b;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.learnerPreviewName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin-bottom: 4px;
+}
+
+.learnerPreviewHint {
+  font-size: 12px;
+  color: #9aadad;
+  margin-bottom: 20px;
+}
+
+.learnerPreviewFields {
+  width: 100%;
+  border-top: 1px solid #f0f4f4;
+  padding-top: 16px;
+}
+
+.learnerPreviewRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid #f0f4f4;
+  font-size: 13px;
+}
+
+.learnerPreviewRow:last-child { border-bottom: none; }
+
+.lpLabel { color: #9aadad; font-weight: 500; }
+
+.lpValue { color: #1a2b2b; font-weight: 600; }
+
+.statusActive {
+  background: #e6f7f7;
+  color: #0b7b7b;
+  border: 1px solid #b2dede;
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.learnerPreviewFootnote {
+  margin-top: 16px;
+  width: 100%;
+  background: #f0fafa;
+  border: 1px solid #b2dede;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #4a7070;
+  text-align: center;
+}
+
+/* ─── Snapshot column ─────────────────────────────────────────── */
+.snapshotCol { display: flex; flex-direction: column; }
+
+.snapshotCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 18px 20px;
+}
+
+.snapshotTitle {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0 0 14px;
+}
+
+.snapshotRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f4f4;
+  font-size: 13px;
+}
+
+.snapshotRow:last-child { border-bottom: none; }
+
+.snapshotKey { color: #7a9a9a; }
+
+.snapshotVal { font-weight: 600; color: #1a2b2b; }
+
+.snapshotValAccent { font-weight: 700; color: #0b7b7b; }
+
+/* ─── Selected courses in snapshot ───────────────────────────── */
+.selectedCourseRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid #f0f4f4;
+  font-size: 13px;
+}
+
+.selectedCourseName { color: #1a2b2b; font-weight: 500; }
+
+.selectedBadge {
+  background: #e6f7f7;
+  color: #0b7b7b;
+  border: 1px solid #b2dede;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 2px 10px;
+}
+
+.noCoursesHint { font-size: 13px; color: #b0c8c8; padding: 8px 0; }
+
+.totalSelectedRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  margin-top: 4px;
+  font-size: 13.5px;
+}
+
+.totalSelectedLabel { font-weight: 700; color: #1a2b2b; }
+
+.totalSelectedVal { font-weight: 700; color: #1a2b2b; }
+
+/* ─── Footer right group (Discard + Save) ─────────────────────── */
+.footerRightGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btnDiscard {
+  background: none;
+  border: none;
+  color: #0b7b7b;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.btnDiscard:hover { color: #0a6060; }

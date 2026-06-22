@@ -1,0 +1,435 @@
+/* ─── Layout ─────────────────────────────────────────────────── */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #1a2b2b;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: #fff;
+  border-right: 1px solid #e8edf0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+}
+
+.sidebarLogo {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 19px;
+  font-weight: 800;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-style: normal;
+  letter-spacing: -0.5px;
+  background: #fff;
+  border-bottom: 1px solid #e8edf0;
+}
+.logoD { color: #0d2020; }
+.logoA { color: #0b7b7b; }
+
+.sidebarSection {
+  padding: 16px 0 4px;
+}
+
+.sidebarLabel {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #9aadad;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 18px 6px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  cursor: pointer;
+  color: #4a6060;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.navItem:hover {
+  background: #f0f7f7;
+  color: #0b7b7b;
+}
+
+.navItemActive {
+  background: #0b7b7b;
+  color: #fff;
+  border-radius: 8px;
+  margin: 0 8px;
+  padding: 9px 10px;
+  width: calc(100% - 16px);
+}
+
+.navItemActive:hover {
+  background: #0a6b6b;
+  color: #fff;
+}
+
+.navIcon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.navItemActive .navIcon { opacity: 1; }
+
+.sidebarSpacer { flex: 1; }
+
+.sidebarFooter {
+  border-top: 1px solid #f0f4f4;
+  padding: 12px 0;
+}
+
+/* ─── Main ────────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ─── Topbar ──────────────────────────────────────────────────── */
+.topbar {
+  background: #cde9e6;
+  border-bottom: 1px solid #b0d8d4;
+  padding: 0 28px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.breadcrumb {
+  font-size: 13.5px;
+  color: #9aadad;
+}
+
+.breadcrumb strong {
+  color: #1a2b2b;
+  font-weight: 600;
+}
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btnAddLearner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid #e8edf0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #4a6060;
+}
+
+.avatarBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: #0b7b7b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+}
+
+/* ─── Content ─────────────────────────────────────────────────── */
+.content {
+  padding: 24px 28px;
+  flex: 1;
+}
+
+/* ─── Two-column grid ─────────────────────────────────────────── */
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ─── Card ────────────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 24px;
+  border: 1px solid #e8edf0;
+}
+
+.cardTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0 0 22px;
+}
+
+/* ─── Form elements ───────────────────────────────────────────── */
+.fieldGroup {
+  margin-bottom: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a2b2b;
+  margin-bottom: 6px;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.select {
+  width: 100%;
+  appearance: none;
+  padding: 10px 36px 10px 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #6b7280;
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.select:focus {
+  border-color: #0b7b7b;
+  color: #1a2b2b;
+}
+
+.chevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: #9aadad;
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1a2b2b;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.input::placeholder { color: #9aadad; }
+.input:focus { border-color: #0b7b7b; }
+
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #1a2b2b;
+  background: #fff;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.textarea::placeholder { color: #9aadad; }
+.textarea:focus { border-color: #0b7b7b; }
+
+.btnSubmit {
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 0.2s;
+}
+
+.btnSubmit:hover { background: #0a6b6b; }
+
+.successBanner {
+  background: #e6f4f0;
+  color: #0b7b7b;
+  border: 1px solid #b2ddd4;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+/* ─── Ticket list ─────────────────────────────────────────────── */
+.ticketList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ticketCard {
+  border: 1px solid #e8edf0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  transition: box-shadow 0.15s;
+}
+
+.ticketCard:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.ticketTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.ticketIdGroup {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ticketId {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a2b2b;
+}
+
+.ticketDot {
+  color: #9aadad;
+  font-size: 13px;
+}
+
+.ticketCategory {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a2b2b;
+}
+
+.ticketTitle {
+  font-size: 12px;
+  color: #6b8080;
+  margin-bottom: 10px;
+}
+
+.ticketProgressRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.ticketTrack {
+  flex: 1;
+  height: 5px;
+  background: #e8edf0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ticketFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.ticketScore {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a6060;
+  min-width: 32px;
+  text-align: right;
+}
+
+.ticketMeta {
+  font-size: 11px;
+  color: #9aadad;
+  line-height: 1.4;
+}
+
+/* ─── Status badges ───────────────────────────────────────────── */
+.statusBadge {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.statusInProgress {
+  background: #fff8e6;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+}
+
+.statusResolved {
+  background: #e6f4f0;
+  color: #0b7b7b;
+  border: 1px solid #b2ddd4;
+}
+
+.statusOpen {
+  background: #ffeaea;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}

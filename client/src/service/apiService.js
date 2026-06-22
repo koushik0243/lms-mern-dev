@@ -1,0 +1,169 @@
+import axios from 'axios';
+import { API_URL } from '../lib/constant';
+
+const GET_CACHE_TTL_MS = 60 * 1000;
+const getResponseCache = new Map();
+const pendingGetRequests = new Map();
+
+const getTokenFromStorage = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const adminToken = localStorage.getItem('adminToken');
+  const userToken = localStorage.getItem('BHARAT_TOKEN');
+  const rawToken = adminToken || userToken;
+
+  if (!rawToken || rawToken === 'undefined' || rawToken === 'null') {
+    return null;
+  }
+
+  const normalizedToken = String(rawToken).trim().replace(/^"|"$/g, '');
+  if (!normalizedToken) {
+    return null;
+  }
+
+  return normalizedToken.startsWith('Bearer ')
+    ? normalizedToken.slice(7).trim()
+    : normalizedToken;
+};
+
+async function apiServiceHandler(method, endpoint, payload) {
+  const token = getTokenFromStorage();
+  const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+  const normalizedMethod = String(method || '').toUpperCase();
+  const requestUrl = `${API_URL}/${endpoint}`;
+  const cacheKey = `${token || 'anonymous'}::${requestUrl}`;
+
+  try {
+    let response;
+    if (normalizedMethod === 'GET') {
+      // Delete-via-GET endpoints must never be cached; always clear list cache afterward
+      if (requestUrl.includes('/delete/')) {
+        try {
+          const axiosResponse = await axios({ method: 'get', url: requestUrl, headers });
+          return axiosResponse.data;
+        } finally {
+          getResponseCache.clear();
+          pendingGetRequests.clear();
+        }
+      }
+
+      const cachedEntry = getResponseCache.get(cacheKey);
+      if (cachedEntry && Date.now() - cachedEntry.timestamp < GET_CACHE_TTL_MS) {
+        return cachedEntry.data;
+      }
+
+      const pendingRequest = pendingGetRequests.get(cacheKey);
+      if (pendingRequest) {
+        return pendingRequest;
+      }
+
+      const requestPromise = axios({
+        method: 'get',
+        url: requestUrl,
+        headers
+      })
+        .then((axiosResponse) => {
+          const responseData = axiosResponse.data;
+          getResponseCache.set(cacheKey, {
+            data: responseData,
+            timestamp: Date.now(),
+          });
+          return responseData;
+        })
+        .finally(() => {
+          pendingGetRequests.delete(cacheKey);
+        });
+
+      pendingGetRequests.set(cacheKey, requestPromise);
+      return requestPromise;
+
+    } else if (normalizedMethod === 'POST') {
+
+      response = await axios({
+        method: 'post',
+        url: requestUrl,
+        headers,
+        data: payload
+      });
+      getResponseCache.clear();
+
+    } else if (normalizedMethod === 'PUT') {
+      
+      response = await axios({
+        method: 'put',
+        url: requestUrl,
+        headers,
+        data: payload
+      });
+      getResponseCache.clear();
+
+    }
+    else if (normalizedMethod === 'DELETE') {
+
+      response = await axios({
+        method: 'delete',
+        url: requestUrl,
+        headers,
+        data: payload
+      });
+      getResponseCache.clear();
+
+    }
+    else {
+      throw new Error('Unsupported HTTP method');
+    }
+
+    return response.data;
+  } catch (error) {
+    const getErrorMessage = (err) => {
+      const responseData = err?.response?.data;
+      const statusCode = err?.response?.status;
+
+      if (typeof responseData === 'string' && responseData.trim()) {
+        return responseData;
+      }
+
+      if (Array.isArray(responseData?.message) && responseData.message.length) {
+        return responseData.message.join(', ');
+      }
+
+      if (typeof responseData?.message === 'string' && responseData.message.trim()) {
+        return responseData.message;
+      }
+
+      if (typeof responseData?.error === 'string' && responseData.error.trim()) {
+        return responseData.error;
+      }
+
+      if (statusCode) {
+        return `Request failed (${statusCode}).`;
+      }
+
+      return err?.message || 'An error occurred';
+    };
+
+    // Extract and throw a proper error message
+    if (error.response) {
+      const wrappedError = new Error(getErrorMessage(error));
+      wrappedError.statusCode = error.response?.status;
+      throw wrappedError;
+    } else if (error.request) {
+      // Request made but no response
+      throw new Error('No response from server. Please check your connection.');
+    } else {
+      // Something else happened
+      const wrappedError = new Error(getErrorMessage(error));
+      wrappedError.statusCode = error?.statusCode;
+      throw wrappedError;
+    }
+  }
+}
+
+export function clearGetCache() {
+  getResponseCache.clear();
+  pendingGetRequests.clear();
+}
+
+export default apiServiceHandler;

@@ -1,0 +1,214 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
+import apiServiceHandler from '../../../service/apiService';
+import SuperAdminShell from '../SuperAdminShell';
+import ConfirmModal from '../ConfirmModal';
+import s from './OrgCourseAssignment.module.css';
+
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+  </svg>
+);
+const TrashIcon = () => (
+  <svg viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+  </svg>
+);
+
+function fmtDate(val) {
+  if (!val) return '—';
+  const d = new Date(val);
+  if (isNaN(d)) return '—';
+  return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+}
+
+function groupByOrg(records) {
+  const map = new Map();
+  for (const rec of records) {
+    const orgKey = String(rec.orgId?._id ?? 'unknown');
+    if (!map.has(orgKey)) {
+      map.set(orgKey, {
+        orgId:   rec.orgId?._id,
+        orgName: rec.orgId?.org_name || '—',
+        courses: [],
+      });
+    }
+    map.get(orgKey).courses.push({
+      recordId:  rec._id,
+      title:     rec.courseId?.title || '—',
+      status:    rec.status,
+      createdAt: rec.createdAt,
+    });
+  }
+  return [...map.values()];
+}
+
+export default function OrgCourseAssignmentList() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [records, setRecords]         = useState([]);
+  const [orgs, setOrgs]               = useState([]);
+  const [loading, setLoading]         = useState(true);
+  const [search, setSearch]           = useState('');
+  const [selectedOrg, setSelectedOrg] = useState(searchParams.get('orgId') ?? '');
+  const [hoveredOrg, setHoveredOrg]   = useState(null);
+  const [confirm, setConfirm]         = useState({ show: false, id: null, label: '' });
+
+  const fetchRecords = useCallback(() => {
+    setLoading(true);
+    apiServiceHandler('GET', 'organization-course/list')
+      .then(res => setRecords(Array.isArray(res?.data) ? res.data : []))
+      .catch(() => setRecords([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { fetchRecords(); }, [fetchRecords]);
+
+  useEffect(() => {
+    apiServiceHandler('GET', 'organization/list-pagination?limit=1000')
+      .then(res => setOrgs(Array.isArray(res?.data) ? res.data : []))
+      .catch(() => setOrgs([]));
+  }, []);
+
+  const grouped = groupByOrg(records);
+
+  const filtered = grouped.reduce((acc, g) => {
+    if (selectedOrg && String(g.orgId) !== selectedOrg) return acc;
+    const term = search.trim().toLowerCase();
+    const matchingCourses = term
+      ? g.courses.filter(c =>
+          c.title.toLowerCase().includes(term) ||
+          g.orgName.toLowerCase().includes(term)
+        )
+      : g.courses;
+    if (matchingCourses.length === 0) return acc;
+    acc.push({ ...g, courses: matchingCourses });
+    return acc;
+  }, []);
+
+  function doDelete() {
+    const { id } = confirm;
+    setConfirm({ show: false, id: null, label: '' });
+    apiServiceHandler('GET', `organization-course/delete/${id}`)
+      .then(() => { toast.success('Assignment deleted.'); fetchRecords(); })
+      .catch(() => toast.error('Delete failed.'));
+  }
+
+  let rowCounter = 0;
+
+  return (
+    <SuperAdminShell activeSection="assign-course">
+      <ConfirmModal
+        show={confirm.show}
+        title="Delete Assignment"
+        message={`Remove "${confirm.label}" from this organization? This cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={doDelete}
+        onCancel={() => setConfirm({ show: false, id: null, label: '' })}
+      />
+
+      <div className={s.pageHeader}>
+        <div>
+          <h1 className={s.pageTitle}>Course Assignments</h1>
+          <p className={s.pageSubtitle}>Manage course assignments to organizations</p>
+        </div>
+        <button className={s.btnAdd} onClick={() => router.push(`/superadmin/organization-course-assignment/add${selectedOrg ? `?orgId=${selectedOrg}` : ''}`)}>
+          + Add Assignment
+        </button>
+      </div>
+
+      <div className={s.card}>
+        <div className={s.filterBar}>
+          <select
+            className={s.orgSelect}
+            value={selectedOrg}
+            onChange={e => setSelectedOrg(e.target.value)}
+          >
+            <option value="">All Organizations</option>
+            {orgs.map(o => (
+              <option key={o._id} value={o._id}>{o.org_name}</option>
+            ))}
+          </select>
+          <div className={s.searchWrap}>
+            <SearchIcon />
+            <input
+              className={s.searchInput}
+              type="text"
+              placeholder="Search by organization or course name…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={s.tableWrap}>
+          <table className={s.table}>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Organization</th>
+                <th>Course</th>
+                <th>Status</th>
+                <th>Assigned On</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr className={s.emptyRow}><td colSpan={6}>Loading…</td></tr>
+              ) : filtered.length === 0 ? (
+                <tr className={s.emptyRow}><td colSpan={6}>No assignments found.</td></tr>
+              ) : (
+                filtered.flatMap((g, idx) => {
+                  const orgKey  = String(g.orgId ?? idx);
+                  const hovered = hoveredOrg === orgKey ? s.orgHover : '';
+                  const stripe  = idx % 2 !== 0 ? s.stripeAlt : '';
+                  rowCounter++;
+                  const orgSerial = rowCounter;
+
+                  return g.courses.map((course, ci) => (
+                    <tr
+                      key={`${orgKey}-${ci}`}
+                      className={[stripe, hovered, ci > 0 ? s.subRow : ''].filter(Boolean).join(' ') || undefined}
+                      onMouseEnter={() => setHoveredOrg(orgKey)}
+                      onMouseLeave={() => setHoveredOrg(null)}
+                    >
+                      {ci === 0 && (
+                        <>
+                          <td rowSpan={g.courses.length}>{orgSerial}</td>
+                          <td rowSpan={g.courses.length}>
+                            <div className={s.cellMain}>{g.orgName}</div>
+                          </td>
+                        </>
+                      )}
+                      <td>{course.title}</td>
+                      <td>
+                        {course.status === 'active'
+                          ? <span className={s.badgeActive}>Active</span>
+                          : <span className={s.badgeInactive}>Inactive</span>}
+                      </td>
+                      <td>{fmtDate(course.createdAt)}</td>
+                      <td>
+                        <button
+                          className={s.btnDelete}
+                          title="Delete"
+                          onClick={() => setConfirm({ show: true, id: course.recordId, label: course.title })}
+                        >
+                          <TrashIcon />
+                        </button>
+                      </td>
+                    </tr>
+                  ));
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </SuperAdminShell>
+  );
+}
