@@ -14,7 +14,9 @@ const Router = express.Router();
 // ── Multer for topic file uploads (assignment & lesson image) ─────────────────
 const topicStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const subDir = file.fieldname === 'lesson_image' ? 'lesson-images' : 'assignments';
+        const subDir = file.fieldname === 'lesson_image' ? 'lesson-images'
+                     : file.fieldname === 'lesson_video' ? 'lesson-videos'
+                     : 'assignments';
         const uploadDir = path.join(__dirname, '..', 'public', 'uploads', subDir);
         fs.mkdirSync(uploadDir, { recursive: true });
         cb(null, uploadDir);
@@ -31,6 +33,11 @@ const topicFileFilter = (req, file, cb) => {
         const ext = path.extname(file.originalname).toLowerCase();
         if (allowed.includes(ext)) cb(null, true);
         else cb(new Error(`Invalid image type. Allowed: ${allowed.join(', ')}`));
+    } else if (file.fieldname === 'lesson_video') {
+        const allowed = ['.mp4', '.webm', '.mov', '.avi', '.mkv'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowed.includes(ext)) cb(null, true);
+        else cb(new Error(`Invalid video type. Allowed: ${allowed.join(', ')}`));
     } else {
         const allowed = ['.doc', '.docx', '.pdf', '.ppt', '.pptx', '.zip', '.rar'];
         const ext = path.extname(file.originalname).toLowerCase();
@@ -45,7 +52,8 @@ const topicUpload = multer({
     limits: { fileSize: 100 * 1024 * 1024 }
 }).fields([
     { name: 'assignment_file', maxCount: 1 },
-    { name: 'lesson_image', maxCount: 1 }
+    { name: 'lesson_image', maxCount: 1 },
+    { name: 'lesson_video', maxCount: 1 }
 ]);
 
 const createTopic = async (req, res, next) => {
@@ -59,6 +67,9 @@ const createTopic = async (req, res, next) => {
             }
             if (files.lesson_image?.[0]) {
                 body.imageUrl = `/uploads/lesson-images/${files.lesson_image[0].filename}`;
+            }
+            if (files.lesson_video?.[0]) {
+                body.videoUrl = `/uploads/lesson-videos/${files.lesson_video[0].filename}`;
             }
             const data = await TopicHelper.createTopic(body);
             res.status(200).json({ status: 200, message: "Successfully added.", data });
@@ -85,6 +96,9 @@ const updateTopic = async (req, res, next) => {
             const files = req.files || {};
             if (files.lesson_image?.[0]) {
                 body.imageUrl = `/uploads/lesson-images/${files.lesson_image[0].filename}`;
+            }
+            if (files.lesson_video?.[0]) {
+                body.videoUrl = `/uploads/lesson-videos/${files.lesson_video[0].filename}`;
             }
             const data = await TopicHelper.updateTopic(req.params.id, body);
             res.status(200).json({ status: 200, message: "Successfully updated.", data });

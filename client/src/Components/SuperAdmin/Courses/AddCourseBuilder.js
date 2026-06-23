@@ -10,6 +10,7 @@ import ConfirmModal from '../ConfirmModal';
 import s from './CourseBuilder.module.css';
 
 /* ── Constants ─────────────────────────────────────────────────── */
+const CHAPTER_COLORS = ['#3b82f6', '#7c3aed', '#059669', '#dc2626', '#d97706', '#0b7b7b', '#db2777', '#6d28d9'];
 const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
 const TOPIC_TYPES = [
   { value: 'document',  label: 'Document'  },
@@ -128,7 +129,6 @@ export default function AddCourseBuilder({ editId } = {}) {
     contentDrip: false,
     // additional
     maxStudents: '',
-    introVideoUrl: '',
     // step 3 overview
     what_will_learn: '',
     target_audience: '',
@@ -249,6 +249,7 @@ export default function AddCourseBuilder({ editId } = {}) {
     name: '',
     content: '',
     featuredImage: null,
+    imageUrl: '',
     video: null,
     videoUrl: '',
     playbackHour: '0',
@@ -260,7 +261,7 @@ export default function AddCourseBuilder({ editId } = {}) {
 
   function openLessonModal(chIdx) {
     setLessonForm({
-      name: '', content: '', featuredImage: null, video: null, videoUrl: '',
+      name: '', content: '', featuredImage: null, imageUrl: '', video: null, videoUrl: '',
       playbackHour: '0', playbackMin: '0', playbackSec: '0',
       exerciseFile: null, lessonPreview: false,
     });
@@ -292,7 +293,7 @@ export default function AddCourseBuilder({ editId } = {}) {
       playbackSec: lessonForm.playbackSec,
     };
     let payload;
-    if (lessonBase.featuredImage) {
+    if (lessonBase.featuredImage || lessonBase.video) {
       payload = new FormData();
       payload.append('courseId', courseId);
       payload.append('chapterId', chServerId);
@@ -306,7 +307,8 @@ export default function AddCourseBuilder({ editId } = {}) {
       payload.append('order', String(order));
       payload.append('isPreview', 'false');
       payload.append('status', 'active');
-      payload.append('lesson_image', lessonBase.featuredImage);
+      if (lessonBase.featuredImage) payload.append('lesson_image', lessonBase.featuredImage);
+      if (lessonBase.video) payload.append('lesson_video', lessonBase.video);
     } else {
       payload = {
         courseId, chapterId: chServerId,
@@ -511,7 +513,6 @@ export default function AddCourseBuilder({ editId } = {}) {
           qnaEnabled: c.qna_enabled !== undefined ? c.qna_enabled : false,
           contentDrip: c.content_drip !== undefined ? c.content_drip : false,
           maxStudents: c.max_students ? String(c.max_students) : '',
-          introVideoUrl: c.intro_video_url || '',
           what_will_learn: c.what_will_learn || '',
           target_audience: c.target_audience || '',
           materials_included: c.materials_included || '',
@@ -541,6 +542,7 @@ export default function AddCourseBuilder({ editId } = {}) {
                 serverId: t._id,
                 name: t.title || '',
                 content: t.desc || '',
+                imageUrl: t.imageUrl || '',
                 videoUrl: t.videoUrl || '',
                 playbackHour: t.duration_hr || '0',
                 playbackMin: t.duration_min || '0',
@@ -943,7 +945,6 @@ export default function AddCourseBuilder({ editId } = {}) {
       fd.append('enable_review', String(form.enableReview));
       fd.append('qna_enabled', String(form.qnaEnabled));
       fd.append('max_students', form.maxStudents || '0');
-      fd.append('intro_video_url', form.introVideoUrl || '');
       if (form.selectedCatIds.length > 0) fd.append('catId', form.selectedCatIds[0]);
       fd.append('subCatIds', JSON.stringify(form.selectedCatIds.slice(1)));
       fd.append('tagIds', JSON.stringify(form.selectedTagIds));
@@ -1048,8 +1049,7 @@ export default function AddCourseBuilder({ editId } = {}) {
         fd.append('enable_review', String(form.enableReview));
         fd.append('qna_enabled', String(form.qnaEnabled));
         fd.append('max_students', form.maxStudents || '0');
-        fd.append('intro_video_url', form.introVideoUrl || '');
-        if (form.selectedCatIds.length > 0) fd.append('catId', form.selectedCatIds[0]);
+          if (form.selectedCatIds.length > 0) fd.append('catId', form.selectedCatIds[0]);
         fd.append('subCatIds', JSON.stringify(form.selectedCatIds.slice(1)));
         fd.append('tagIds', JSON.stringify(form.selectedTagIds));
         fd.append('totalChapters', String(chapters.length));
@@ -1171,20 +1171,48 @@ export default function AddCourseBuilder({ editId } = {}) {
               <div className={s.modalSideSection}>
                 <div className={s.modalSideTitle}>Featured Image</div>
                 <div className={s.modalUploadArea}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="28" height="28" strokeWidth="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <polyline points="21,15 16,10 5,21"/>
-                  </svg>
+                  {lessonForm.featuredImage ? (
+                    <img
+                      src={URL.createObjectURL(lessonForm.featuredImage)}
+                      alt="preview"
+                      style={{ width: '100%', maxHeight: 90, objectFit: 'cover', borderRadius: 6, marginBottom: 6 }}
+                    />
+                  ) : lessonForm.imageUrl ? (
+                    <img
+                      src={`${API_URL}${lessonForm.imageUrl}`}
+                      alt="featured"
+                      style={{ width: '100%', maxHeight: 90, objectFit: 'cover', borderRadius: 6, marginBottom: 6 }}
+                    />
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="28" height="28" strokeWidth="1.5">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21,15 16,10 5,21"/>
+                    </svg>
+                  )}
                   <label className={s.modalUploadBtn}>
-                    Upload Image
+                    {lessonForm.featuredImage || lessonForm.imageUrl ? 'Change Image' : 'Upload Image'}
                     <input type="file" accept="image/*" hidden
                       onChange={e => setLessonField('featuredImage', e.target.files[0])} />
                   </label>
                   <span className={s.modalUploadNote}>JPEG, PNG, GIF, and WebP formats, up to 400 MB</span>
-                  {lessonForm.featuredImage && (
-                    <span className={s.modalFileName}>{lessonForm.featuredImage.name}</span>
-                  )}
+                  {lessonForm.featuredImage ? (
+                    <>
+                      <span className={s.modalFileName}>{lessonForm.featuredImage.name}</span>
+                      <button type="button" className={s.modalAddFromUrl}
+                        onClick={() => window.open(URL.createObjectURL(lessonForm.featuredImage), '_blank')}>
+                        🖼 View in new tab
+                      </button>
+                    </>
+                  ) : lessonForm.imageUrl ? (
+                    <>
+                      <span className={s.modalFileName}>{lessonForm.imageUrl.split('/').pop()}</span>
+                      <button type="button" className={s.modalAddFromUrl}
+                        onClick={() => window.open(`${API_URL}${lessonForm.imageUrl}`, '_blank')}>
+                        🖼 View in new tab
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
 
@@ -1197,15 +1225,34 @@ export default function AddCourseBuilder({ editId } = {}) {
                     <path d="M16 9l6-3v12l-6-3V9z"/>
                   </svg>
                   <label className={s.modalUploadBtn}>
-                    Upload Video
+                    {lessonForm.video || lessonForm.videoUrl ? 'Change Video' : 'Upload Video'}
                     <input type="file" accept="video/*" hidden
-                      onChange={e => setLessonField('video', e.target.files[0])} />
+                      onChange={e => { setLessonField('video', e.target.files[0]); setLessonField('videoUrl', ''); }} />
                   </label>
-                  <button type="button" className={s.modalAddFromUrl}>Add from URL</button>
                   <span className={s.modalUploadNote}>MP4, and WebM formats, up to 400 MB</span>
-                  {lessonForm.video && (
-                    <span className={s.modalFileName}>{lessonForm.video.name}</span>
-                  )}
+                  {lessonForm.video ? (
+                    <>
+                      <span className={s.modalFileName}>{lessonForm.video.name}</span>
+                      <button
+                        type="button"
+                        className={s.modalAddFromUrl}
+                        onClick={() => window.open(URL.createObjectURL(lessonForm.video), '_blank')}
+                      >
+                        ▶ Play in new tab
+                      </button>
+                    </>
+                  ) : lessonForm.videoUrl ? (
+                    <>
+                      <span className={s.modalFileName}>{lessonForm.videoUrl.split('/').pop()}</span>
+                      <button
+                        type="button"
+                        className={s.modalAddFromUrl}
+                        onClick={() => window.open(`${API_URL}${lessonForm.videoUrl}`, '_blank')}
+                      >
+                        ▶ Play in new tab
+                      </button>
+                    </>
+                  ) : null}
                 </div>
               </div>
 
@@ -1572,10 +1619,24 @@ export default function AddCourseBuilder({ editId } = {}) {
                   onChange={e => setFeaturedImageFile(e.target.files[0] || null)}
                 />
               </label>
-              {featuredImageFile && (
-                <span className={s.uploadAreaNote} style={{ wordBreak: 'break-all' }}>{featuredImageFile.name}</span>
-              )}
-              {!featuredImageFile && !existingCourseImage && <span className={s.uploadAreaNote}>JPG, PNG up to 2MB</span>}
+              <span className={s.uploadAreaNote}>JPEG, PNG, GIF, and WebP formats, up to 400 MB</span>
+              {featuredImageFile ? (
+                <>
+                  <span className={s.uploadAreaNote} style={{ wordBreak: 'break-all' }}>{featuredImageFile.name}</span>
+                  <button type="button" className={s.modalAddFromUrl}
+                    onClick={() => window.open(URL.createObjectURL(featuredImageFile), '_blank')}>
+                    🖼 View in new tab
+                  </button>
+                </>
+              ) : existingCourseImage ? (
+                <>
+                  <span className={s.uploadAreaNote} style={{ wordBreak: 'break-all' }}>{existingCourseImage.split('/').pop()}</span>
+                  <button type="button" className={s.modalAddFromUrl}
+                    onClick={() => window.open(`${API_URL}${existingCourseImage}`, '_blank')}>
+                    🖼 View in new tab
+                  </button>
+                </>
+              ) : null}
             </div>
           </div>
         </div>
@@ -1595,18 +1656,25 @@ export default function AddCourseBuilder({ editId } = {}) {
                   onChange={e => setIntroVideoFile(e.target.files[0] || null)}
                 />
               </label>
-              {introVideoFile && (
-                <span className={s.uploadAreaNote} style={{ wordBreak: 'break-all' }}>{introVideoFile.name}</span>
-              )}
-              {!introVideoFile && existingIntroVideo && (
-                <span className={s.uploadAreaNote} style={{ wordBreak: 'break-all', color: '#4b9ef5' }}>
-                  Current: {existingIntroVideo.split('/').pop()}
-                </span>
-              )}
-              {!introVideoFile && !existingIntroVideo && <span className={s.uploadAreaNote}>or paste a URL below</span>}
+              <span className={s.uploadAreaNote}>MP4, and WebM formats, up to 400 MB</span>
+              {introVideoFile ? (
+                <>
+                  <span className={s.uploadAreaNote} style={{ wordBreak: 'break-all' }}>{introVideoFile.name}</span>
+                  <button type="button" className={s.modalAddFromUrl}
+                    onClick={() => window.open(URL.createObjectURL(introVideoFile), '_blank')}>
+                    ▶ Play in new tab
+                  </button>
+                </>
+              ) : existingIntroVideo ? (
+                <>
+                  <span className={s.uploadAreaNote} style={{ wordBreak: 'break-all' }}>{existingIntroVideo.split('/').pop()}</span>
+                  <button type="button" className={s.modalAddFromUrl}
+                    onClick={() => window.open(`${API_URL}${existingIntroVideo}`, '_blank')}>
+                    ▶ Play in new tab
+                  </button>
+                </>
+              ) : null}
             </div>
-            <input className={s.input} type="url" placeholder="https://youtu.be/..."
-              value={form.introVideoUrl} onChange={e => setField('introVideoUrl', e.target.value)} />
           </div>
         </div>
 
@@ -1779,7 +1847,6 @@ export default function AddCourseBuilder({ editId } = {}) {
               <div className={s.optionsNav}>
                 {[
                   { key: 'general',      label: 'General' },
-                  { key: 'content-drip', label: 'Content Drip' },
                   { key: 'enrollment',   label: 'Enrollment' },
                 ].map(tab => (
                   <div key={tab.key}
@@ -1939,6 +2006,7 @@ export default function AddCourseBuilder({ editId } = {}) {
               <div
                 key={ch._id}
                 className={`${s.chCard}${dragOverChIdx === chIdx && dragChIdx !== chIdx ? ' ' + s.chCardDragOver : ''}`}
+                style={{ '--ch-color': CHAPTER_COLORS[chIdx % CHAPTER_COLORS.length] }}
                 draggable
                 onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; setDragChIdx(chIdx); }}
                 onDragOver={e => { e.preventDefault(); setDragOverChIdx(chIdx); }}
@@ -1994,8 +2062,10 @@ export default function AddCourseBuilder({ editId } = {}) {
                                     onClick={() => {
                                       setLessonForm({
                                         name: lesson.name, content: lesson.content,
-                                        featuredImage: lesson.featuredImage, video: lesson.video,
-                                        videoUrl: lesson.videoUrl,
+                                        featuredImage: null,
+                                        imageUrl: lesson.imageUrl || '',
+                                        video: null,
+                                        videoUrl: lesson.videoUrl || '',
                                         playbackHour: lesson.playbackHour, playbackMin: lesson.playbackMin,
                                         playbackSec: lesson.playbackSec,
                                         exerciseFile: null, lessonPreview: false,
@@ -2111,10 +2181,6 @@ export default function AddCourseBuilder({ editId } = {}) {
                           <button type="button" className={s.btnChBarItem} onClick={() => openQuizModal(chIdx)}>+ Quiz</button>
                           <button type="button" className={s.btnChBarItem} onClick={() => openZoomModal(chIdx)}>+ Zoom Link</button>
                           <button type="button" className={s.btnChBarItem} onClick={() => openAssignModal(chIdx)}>+ Assignment</button>
-                          <button type="button" className={s.btnChBarItem} style={{ marginLeft: 'auto' }}>
-                            ⊞ Content Bank
-                          </button>
-                          <button type="button" className={s.btnChBarMore}>⋮</button>
                         </div>
                       </>
                     )}
@@ -2165,10 +2231,6 @@ export default function AddCourseBuilder({ editId } = {}) {
                       <button type="button" className={s.btnChBarItem} disabled>+ Quiz</button>
                       <button type="button" className={s.btnChBarItem} disabled>+ Zoom Link</button>
                       <button type="button" className={s.btnChBarItem} disabled>+ Assignment</button>
-                      <button type="button" className={s.btnChBarItem} disabled style={{ marginLeft: 'auto' }}>
-                        ⊞ Content Bank
-                      </button>
-                      <button type="button" className={s.btnChBarMore} disabled>⋮</button>
                     </div>
                   </>
                 )}

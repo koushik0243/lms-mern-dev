@@ -42,9 +42,9 @@ export default function AddOrder() {
   function handleCreditChange(creditId) {
     setField('credit_id', creditId);
     const credit = credits.find(c => String(c._id) === creditId);
-    if (credit?.price) {
-      setField('credit_amount', parseFloat(credit.price.toString()));
-    }
+    const priceVal = credit?.price?.$numberDecimal ?? credit?.price;
+    const parsed = parseFloat(priceVal);
+    setField('credit_amount', isNaN(parsed) ? '' : parsed);
   }
 
   function validate() {
@@ -115,9 +115,10 @@ export default function AddOrder() {
                 className={s.input}
                 type="number"
                 step="0.01"
-                placeholder="0.00"
-                value={form.credit_amount}
-                onChange={e => setField('credit_amount', e.target.value)}
+                placeholder="Auto-populated from Credit Package"
+                value={form.credit_amount === '' || isNaN(form.credit_amount) ? '' : form.credit_amount}
+                disabled
+                style={{ background: '#f3f4f6', color: '#6b7280', cursor: 'not-allowed' }}
               />
               {errors.credit_amount && <p className={s.errorMsg}>{errors.credit_amount}</p>}
             </div>

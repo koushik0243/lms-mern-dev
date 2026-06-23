@@ -298,7 +298,7 @@ export default function SuperAdminShell({ children, activeSection = 'dashboard' 
       <header className={s.topbar}>
         <div className={s.topbarLeft}>
           <div className={s.topbarLogo}>
-            <span className={s.logoD}>sikhø</span><span className={s.logoA}>aur</span><span className={s.logoD}>badhø</span>
+            <img src="/logo.png" alt="sikhoaurbadho" className={s.logoImg} />
           </div>
           <div className={s.breadcrumb}>
             Super Admin / <strong>{currentPageLabel}</strong>

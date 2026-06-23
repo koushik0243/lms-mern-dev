@@ -29,6 +29,7 @@ export default function EditCertificateTemplate() {
   const [errors, setErrors]         = useState({});
   const [loading, setLoading]       = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -120,11 +121,31 @@ export default function EditCertificateTemplate() {
             <button type="submit" className={s.btnSubmit} disabled={submitting}>
               {submitting ? 'Saving…' : 'Save Changes'}
             </button>
+            <button type="button" className={s.btnPreview} onClick={() => setShowPreview(true)}>
+              Preview Certificate
+            </button>
             <button type="button" className={s.btnCancel} onClick={() => router.push('/superadmin/certificate-template')}>
               Cancel
             </button>
           </div>
         </form>
+      )}
+
+      {showPreview && (
+        <div className={s.previewOverlay}>
+          <div className={s.previewTopBar}>
+            <span className={s.previewTopTitle}>Certificate Preview — {title || 'Untitled'}</span>
+            <button className={s.btnHide} onClick={() => setShowPreview(false)}>
+              Close Certificate
+            </button>
+          </div>
+          <iframe
+            className={s.previewFrame}
+            srcDoc={desc}
+            title="Certificate Preview"
+            sandbox="allow-same-origin"
+          />
+        </div>
       )}
     </SuperAdminShell>
   );

@@ -75,7 +75,12 @@ export default function ViewCertificateTemplate() {
         {tpl.desc && (
           <div style={{ marginTop: 20 }}>
             <div className={s.viewLabel}>Template HTML</div>
-            <pre className={s.viewPre}>{tpl.desc}</pre>
+            <iframe
+              srcDoc={tpl.desc}
+              title="Certificate Preview"
+              sandbox="allow-same-origin"
+              style={{ width: '100%', height: 620, border: '1px solid #e5e7eb', borderRadius: 8, marginTop: 12, display: 'block' }}
+            />
           </div>
         )}
       </div>

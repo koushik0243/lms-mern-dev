@@ -846,7 +846,7 @@
 .chCard {
   background: #fff;
   border: 1px solid #dde3f0;
-  border-left: 3px solid #3b82f6;
+  border-left: 3px solid var(--ch-color, #3b82f6);
   border-radius: 8px;
   overflow: hidden;
 }

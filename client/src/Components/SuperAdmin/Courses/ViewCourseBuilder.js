@@ -130,15 +130,6 @@ export default function ViewCourseBuilder() {
               >
                 {course.intro_video.split('/').pop()}
               </a>
-            ) : course.intro_video_url ? (
-              <a
-                href={course.intro_video_url}
-                target="_blank"
-                rel="noreferrer"
-                style={{ fontSize: 13, color: '#2563eb', textDecoration: 'underline', wordBreak: 'break-all' }}
-              >
-                {course.intro_video_url}
-              </a>
             ) : (
               <span style={{ fontSize: 13, color: '#9ca3af' }}>N/A</span>
             )}
@@ -216,7 +207,6 @@ export default function ViewCourseBuilder() {
               <div className={s.optionsNav}>
                 {[
                   { key: 'general',      label: 'General' },
-                  { key: 'content-drip', label: 'Content Drip' },
                   { key: 'enrollment',   label: 'Enrollment' },
                 ].map(tab => (
                   <div

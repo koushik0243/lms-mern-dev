@@ -140,13 +140,6 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <button
-        type="button"
-        className={styles.googleLink}
-        onClick={() => { /* Google OAuth placeholder */ }}
-      >
-        or continue with Google
-      </button>
     </div>
   );
 }
