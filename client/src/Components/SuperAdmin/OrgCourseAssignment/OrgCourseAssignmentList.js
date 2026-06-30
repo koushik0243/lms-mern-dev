@@ -47,6 +47,8 @@ function groupByOrg(records) {
   return [...map.values()];
 }
 
+const LIMIT = 50;
+
 export default function OrgCourseAssignmentList() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,8 +57,11 @@ export default function OrgCourseAssignmentList() {
   const [loading, setLoading]         = useState(true);
   const [search, setSearch]           = useState('');
   const [selectedOrg, setSelectedOrg] = useState(searchParams.get('orgId') ?? '');
+  const [page, setPage]               = useState(1);
   const [hoveredOrg, setHoveredOrg]   = useState(null);
   const [confirm, setConfirm]         = useState({ show: false, id: null, label: '' });
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   const fetchRecords = useCallback(() => {
     setLoading(true);
@@ -90,6 +95,39 @@ export default function OrgCourseAssignmentList() {
     return acc;
   }, []);
 
+  useEffect(() => { setPage(1); }, [search, selectedOrg, sortKey, sortDir]);
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  const sorted = sortKey === 'orgName'
+    ? [...filtered].sort((a, b) => {
+        const av = (a.orgName ?? '').toLowerCase();
+        const bv = (b.orgName ?? '').toLowerCase();
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : sortKey === 'assignedOn'
+      ? [...filtered].sort((a, b) => {
+          const av = new Date(a.courses[0]?.createdAt).getTime() || 0;
+          const bv = new Date(b.courses[0]?.createdAt).getTime() || 0;
+          return sortDir === 'asc' ? av - bv : bv - av;
+        })
+      : filtered;
+
+  const totalOrgs  = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(totalOrgs / LIMIT));
+  const pagedFiltered = sorted.slice((page - 1) * LIMIT, page * LIMIT);
+  const from = totalOrgs === 0 ? 0 : (page - 1) * LIMIT + 1;
+  const to   = Math.min(page * LIMIT, totalOrgs);
+
   function doDelete() {
     const { id } = confirm;
     setConfirm({ show: false, id: null, label: '' });
@@ -98,7 +136,7 @@ export default function OrgCourseAssignmentList() {
       .catch(() => toast.error('Delete failed.'));
   }
 
-  let rowCounter = 0;
+  let rowCounter = (page - 1) * LIMIT;
 
   return (
     <SuperAdminShell activeSection="assign-course">
@@ -150,10 +188,10 @@ export default function OrgCourseAssignmentList() {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Organization</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('orgName')}>Organization{sortArrow('orgName')}</th>
                 <th>Course</th>
                 <th>Status</th>
-                <th>Assigned On</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('assignedOn')}>Assigned On{sortArrow('assignedOn')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -163,7 +201,7 @@ export default function OrgCourseAssignmentList() {
               ) : filtered.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={6}>No assignments found.</td></tr>
               ) : (
-                filtered.flatMap((g, idx) => {
+                pagedFiltered.flatMap((g, idx) => {
                   const orgKey  = String(g.orgId ?? idx);
                   const hovered = hoveredOrg === orgKey ? s.orgHover : '';
                   const stripe  = idx % 2 !== 0 ? s.stripeAlt : '';
@@ -207,6 +245,23 @@ export default function OrgCourseAssignmentList() {
               )}
             </tbody>
           </table>
+        </div>
+
+        <div className={s.pagination}>
+          <span>{totalOrgs === 0 ? 'No records' : `Showing ${from}–${to} of ${totalOrgs}`}</span>
+          <div className={s.paginationBtns}>
+            <button className={s.pageBtn} disabled={page <= 1} onClick={() => setPage(p => p - 1)}>‹</button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+              <button
+                key={p}
+                className={`${s.pageBtn}${page === p ? ` ${s.pageBtnActive}` : ''}`}
+                onClick={() => setPage(p)}
+              >
+                {p}
+              </button>
+            ))}
+            <button className={s.pageBtn} disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>›</button>
+          </div>
         </div>
       </div>
     </SuperAdminShell>

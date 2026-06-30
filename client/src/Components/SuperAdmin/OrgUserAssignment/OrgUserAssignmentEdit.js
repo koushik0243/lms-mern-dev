@@ -80,7 +80,7 @@ export default function OrgUserAssignmentEdit() {
         ) : !user ? (
           <div className={s.emptyHint} style={{ color: '#dc2626' }}>User not found.</div>
         ) : (
-          <form onSubmit={handleSave}>
+          <form onSubmit={handleSave} autoComplete="off">
             <div className={s.formGroup}>
               <p className={s.sectionHeading}>User</p>
               <div className={s.userListBox}>

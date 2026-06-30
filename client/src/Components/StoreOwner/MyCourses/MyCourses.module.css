@@ -351,51 +351,256 @@
   color: #dc2626;
 }
 
-/* ─── Chapter list ────────────────────────────────────────────── */
-.chapterList {
-  margin-top: 14px;
-  padding-left: 4px;
+/* ─── Count pill (card title) ─────────────────────────────────── */
+.countPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  background: #e8f5f5;
+  color: #0b7b7b;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+/* ─── Course card grid ────────────────────────────────────────── */
+.courseGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.courseCard {
+  border: 1px solid #e8edf0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.chapterRow {
+.courseCard:hover {
+  border-color: #b0d8d4;
+  box-shadow: 0 4px 18px rgba(11,123,123,0.09);
+}
+
+/* ─── Thumbnail ───────────────────────────────────────────────── */
+.courseThumb {
+  width: 100%;
+  height: 180px;
+  min-height: 180px;
+  max-height: 180px;
+  background: #f0f7f7;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
-.chapterDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.courseThumbImg {
+  width: 150px;
+  height: 150px;
+  min-width: 150px;
+  min-height: 150px;
+  max-width: 150px;
+  max-height: 150px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border-radius: 8px;
+}
+
+.courseThumbPlaceholder {
+  width: 150px;
+  height: 150px;
+  background: #e8f5f5;
+  color: #0b7b7b;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.chapterDotDone {
-  background: #0b7b7b;
-}
+.courseThumbPlaceholder svg { width: 40px; height: 40px; }
 
-.chapterDotProgress {
-  background: #9aadad;
-}
-
-.chapterName {
+/* ─── Card body ───────────────────────────────────────────────── */
+.courseCardBody {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
   flex: 1;
-  font-size: 13.5px;
+}
+
+.courseCardTitle {
+  font-size: 14.5px;
+  font-weight: 700;
   color: #1a2b2b;
-  font-weight: 500;
+  margin-bottom: 6px;
+  line-height: 1.4;
 }
 
-.chapterStatus {
+.courseCardDesc {
   font-size: 12.5px;
-  color: #4a6060;
-  font-weight: 500;
-  white-space: nowrap;
+  color: #5a7070;
+  line-height: 1.55;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.chapterStatusProgress {
+/* ─── Meta rows (category / tags / level) ─────────────────────── */
+.courseCardRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 7px;
+}
+
+.rowIcon {
+  width: 14px;
+  height: 14px;
   color: #9aadad;
-  font-style: italic;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+}
+
+.rowIcon svg { width: 13px; height: 13px; }
+
+.catLabel {
+  font-size: 12.5px;
+  color: #0b7b7b;
+  font-weight: 600;
+}
+
+/* ─── Tags ────────────────────────────────────────────────────── */
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tagPill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 8px;
+  border-radius: 20px;
+  background: #f0f4f4;
+  color: #4a6060;
+  border: 1px solid #e0eaea;
+}
+
+/* ─── Chapters + duration stats row ──────────────────────────── */
+.courseCardStats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.statChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4a6060;
+}
+
+.statChip svg { width: 13px; height: 13px; color: #9aadad; }
+
+/* ─── Learner count row ───────────────────────────────────────── */
+.learnerRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4a6060;
+  margin-bottom: 8px;
+}
+
+.learnerRow svg {
+  width: 14px;
+  height: 14px;
+  color: #0b7b7b;
+  flex-shrink: 0;
+}
+
+/* ─── Status badges row ───────────────────────────────────────── */
+.courseCardMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+/* ─── Badges ──────────────────────────────────────────────────── */
+.badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 10px;
+  border-radius: 20px;
+  text-transform: capitalize;
+}
+
+.badgePublished {
+  background: #edf7f3;
+  color: #0b6e4f;
+  border: 1px solid #b5e0cc;
+}
+
+.badgeDraft {
+  background: #fff8e6;
+  color: #9a6800;
+  border: 1px solid #f0d890;
+}
+
+.badgeInactive {
+  background: #f4f6f8;
+  color: #7a9090;
+  border: 1px solid #d4dee0;
+}
+
+.badgeLevel {
+  background: #f0f0ff;
+  color: #4f46e5;
+  border: 1px solid #c7d2fe;
+  text-transform: capitalize;
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────── */
+.skeletonCard {
+  height: 260px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e8edf0 25%, #f4f6f8 50%, #e8edf0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Empty state ─────────────────────────────────────────────── */
+.empty {
+  color: #9aadad;
+  font-size: 14px;
+  text-align: center;
+  padding: 40px 0;
 }

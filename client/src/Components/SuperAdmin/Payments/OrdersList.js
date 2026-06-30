@@ -50,6 +50,8 @@ export default function OrdersList() {
   const [confirm, setConfirm]       = useState({ show: false, id: null });
   const [selected, setSelected]     = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   const fetchOrders = useCallback(() => {
     setLoading(true);
@@ -66,6 +68,15 @@ export default function OrdersList() {
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
   const filtered = search
     ? orders.filter(o =>
         (o.organizer_id?.org_name || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -73,6 +84,20 @@ export default function OrdersList() {
         (o.payment_gateway || '').toLowerCase().includes(search.toLowerCase())
       )
     : orders;
+
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        let av, bv;
+        if (sortKey === 'org_name') { av = (a.organizer_id?.org_name ?? '').toLowerCase(); bv = (b.organizer_id?.org_name ?? '').toLowerCase(); }
+        else if (sortKey === 'credit_title') { av = (a.credit_id?.title ?? '').toLowerCase(); bv = (b.credit_id?.title ?? '').toLowerCase(); }
+        else if (sortKey === 'credit_amount') { return sortDir === 'asc' ? (Number(a.credit_amount)||0) - (Number(b.credit_amount)||0) : (Number(b.credit_amount)||0) - (Number(a.credit_amount)||0); }
+        else if (sortKey === 'purchase_date') { return sortDir === 'asc' ? (new Date(a.purchase_date).getTime()||0) - (new Date(b.purchase_date).getTime()||0) : (new Date(b.purchase_date).getTime()||0) - (new Date(a.purchase_date).getTime()||0); }
+        else { av = String(a[sortKey]||'').toLowerCase(); bv = String(b[sortKey]||'').toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : filtered;
 
   function doDelete() {
     const { id } = confirm;
@@ -82,7 +107,7 @@ export default function OrdersList() {
       .catch(() => toast.error('Delete failed.'));
   }
 
-  const allIds = filtered.map(o => o._id);
+  const allIds = sorted.map(o => o._id);
   const allSelected = allIds.length > 0 && allIds.every(id => selected.includes(id));
   const toggleAll = () => setSelected(allSelected ? [] : allIds);
   const toggleOne = id => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -148,11 +173,11 @@ export default function OrdersList() {
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
-                <th>Organization</th>
-                <th>Credit Package</th>
-                <th>Amount</th>
-                <th>Purchase Date</th>
-                <th>Gateway</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('org_name')}>Organization{sortArrow('org_name')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('credit_title')}>Credit Package{sortArrow('credit_title')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('credit_amount')}>Amount{sortArrow('credit_amount')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('purchase_date')}>Purchase Date{sortArrow('purchase_date')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('payment_gateway')}>Gateway{sortArrow('payment_gateway')}</th>
                 <th>Status</th>
                 <th>Action</th>
               </tr>
@@ -160,10 +185,10 @@ export default function OrdersList() {
             <tbody>
               {loading ? (
                 <tr className={s.emptyRow}><td colSpan={9}>Loading…</td></tr>
-              ) : filtered.length === 0 ? (
+              ) : sorted.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={9}>No orders found.</td></tr>
-              ) : filtered.map((o, idx) => (
-                <tr key={o._id}>
+              ) : sorted.map((o, idx) => (
+                <tr key={o._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(o._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(o._id)} onChange={() => toggleOne(o._id)} /></td>
                   <td>{(page - 1) * LIMIT + idx + 1}</td>
                   <td>{o.organizer_id?.org_name || '—'}</td>
@@ -172,12 +197,17 @@ export default function OrdersList() {
                   <td>{fmtDate(o.purchase_date)}</td>
                   <td style={{ textTransform: 'capitalize' }}>{o.payment_gateway || '—'}</td>
                   <td>
-                    {o.status === 'active'
-                      ? <span className={s.badgeActive}>Active</span>
-                      : <span className={s.badgeInactive}>Inactive</span>}
+                    {o.status === 'success'  && <span className={s.badgeSuccess}>Success</span>}
+                    {o.status === 'pending'  && <span className={s.badgePending}>Pending</span>}
+                    {o.status === 'failed'   && <span className={s.badgeFailed}>Failed</span>}
+                    {o.status === 'canceled' && <span className={s.badgeCanceled}>Canceled</span>}
+                    {o.status === 'refunded' && <span className={s.badgeRefunded}>Refunded</span>}
+                    {!['success','pending','failed','canceled','refunded'].includes(o.status) && (
+                      <span className={s.badgePending} style={{ textTransform: 'capitalize' }}>{o.status || 'Pending'}</span>
+                    )}
                   </td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button
                         className={s.btnView}
                         title="View"

@@ -51,13 +51,15 @@ export default function CreditsList() {
   const [confirm, setConfirm] = useState({ show: false, id: null });
   const [selected, setSelected] = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
     return () => clearTimeout(t);
   }, [search]);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, sortKey, sortDir]);
 
   const fetchCredits = useCallback(() => {
     setLoading(true);
@@ -100,6 +102,35 @@ export default function CreditsList() {
       .then(() => { toast.success(`${ids.length} credit${ids.length !== 1 ? 's' : ''} deleted.`); fetchCredits(); })
       .catch(() => toast.error('Some deletes failed'));
   }
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        if (sortKey === 'limit_from') {
+          return sortDir === 'asc' ? (Number(a.limit_from)||0) - (Number(b.limit_from)||0) : (Number(b.limit_from)||0) - (Number(a.limit_from)||0);
+        }
+        if (sortKey === 'price') {
+          const av = parseFloat(a.price?.$numberDecimal ?? a.price ?? 0) || 0;
+          const bv = parseFloat(b.price?.$numberDecimal ?? b.price ?? 0) || 0;
+          return sortDir === 'asc' ? av - bv : bv - av;
+        }
+        const isDate = ['createdAt','updatedAt','purchase_date','payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime()||0; bv = new Date(bv).getTime()||0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : filtered;
 
   const from = total === 0 ? 0 : (page - 1) * LIMIT + 1;
   const to   = Math.min(page * LIMIT, total);
@@ -153,11 +184,11 @@ export default function CreditsList() {
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
-                <th>Title</th>
-                <th>Limits</th>
-                <th>Price</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('title')}>Title{sortArrow('title')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('limit_from')}>Limits{sortArrow('limit_from')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('price')}>Price{sortArrow('price')}</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -166,8 +197,8 @@ export default function CreditsList() {
                 <tr className={s.emptyRow}><td colSpan={8}>Loading…</td></tr>
               ) : filtered.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={8}>No credits found.</td></tr>
-              ) : filtered.map((c, idx) => (
-                <tr key={c._id}>
+              ) : sorted.map((c, idx) => (
+                <tr key={c._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(c._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(c._id)} onChange={() => toggleOne(c._id)} /></td>
                   <td>{(page - 1) * LIMIT + idx + 1}</td>
                   <td>{c.title}</td>
@@ -180,7 +211,7 @@ export default function CreditsList() {
                   </td>
                   <td>{fmtDate(c.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button
                         className={s.btnEdit}
                         title="Edit"

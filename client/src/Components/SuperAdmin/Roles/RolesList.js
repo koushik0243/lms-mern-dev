@@ -58,13 +58,15 @@ export default function RolesList() {
   const [confirm, setConfirm] = useState({ show: false, id: null });
   const [selected, setSelected] = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
     return () => clearTimeout(t);
   }, [search]);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, sortKey, sortDir]);
 
   const fetchRoles = useCallback(() => {
     setLoading(true);
@@ -82,9 +84,40 @@ export default function RolesList() {
 
   useEffect(() => { fetchRoles(); }, [fetchRoles]);
 
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
   const filtered = debouncedSearch
-    ? roles.filter(r => (r.name || '').toLowerCase().includes(debouncedSearch.toLowerCase()))
+    ? roles.filter(r =>
+        (r.name || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (r.display_name || '').toLowerCase().includes(debouncedSearch.toLowerCase())
+      )
     : roles;
+
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        if (sortKey === 'org_name') {
+          const av = (a.organizationId?.org_name ?? '').toLowerCase();
+          const bv = (b.organizationId?.org_name ?? '').toLowerCase();
+          if (av < bv) return sortDir === 'asc' ? -1 : 1;
+          if (av > bv) return sortDir === 'asc' ? 1 : -1;
+          return 0;
+        }
+        const isDate = ['createdAt', 'updatedAt', 'purchase_date', 'payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : filtered;
 
   function doDelete() {
     const id = confirm.id;
@@ -94,7 +127,7 @@ export default function RolesList() {
       .catch(() => toast.error('Delete failed.'));
   }
 
-  const allIds = filtered.map(r => r._id);
+  const allIds = sorted.map(r => r._id);
   const allSelected = allIds.length > 0 && allIds.every(id => selected.includes(id));
   const toggleAll = () => setSelected(allSelected ? [] : allIds);
   const toggleOne = id => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -160,22 +193,22 @@ export default function RolesList() {
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
-                <th>Name</th>
-                <th>Display Name</th>
-                <th>Created By</th>
-                <th>Organization</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('name')}>Name{sortArrow('name')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('display_name')}>Display Name{sortArrow('display_name')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('user_type')}>Created By{sortArrow('user_type')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('org_name')}>Organization{sortArrow('org_name')}</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr className={s.emptyRow}><td colSpan={9}>Loading…</td></tr>
-              ) : filtered.length === 0 ? (
+              ) : sorted.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={9}>No roles found.</td></tr>
-              ) : filtered.map((r, idx) => (
-                <tr key={r._id}>
+              ) : sorted.map((r, idx) => (
+                <tr key={r._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(r._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(r._id)} onChange={() => toggleOne(r._id)} /></td>
                   <td>{(page - 1) * LIMIT + idx + 1}</td>
                   <td>{r.name}</td>
@@ -189,7 +222,7 @@ export default function RolesList() {
                   </td>
                   <td>{fmtDate(r.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button
                         className={s.btnView}
                         title="View"

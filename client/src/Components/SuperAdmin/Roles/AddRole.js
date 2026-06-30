@@ -70,7 +70,7 @@ export default function AddRole() {
       <h1 className={s.pageTitle}>Add Role</h1>
       <p className={s.pageSubtitle}>Create a new system role</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.formCard}>
           <div className={s.formGrid}>
 
@@ -79,11 +79,13 @@ export default function AddRole() {
               <input
                 className={s.input}
                 type="text"
-                placeholder="e.g. Admin"
+                placeholder="e.g. admin"
                 value={form.name}
                 onChange={e => setField('name', e.target.value)}
+                autoComplete="off"
               />
               {errors.name && <p className={s.errorMsg}>{errors.name}</p>}
+              <p className={s.hintMsg}>Small letter with underscore ( _ ) separated</p>
             </div>
 
             <div className={`${s.formGroup} ${s.formGroupFull}`}>
@@ -94,8 +96,10 @@ export default function AddRole() {
                 placeholder="e.g. Administrator"
                 value={form.display_name}
                 onChange={e => setField('display_name', e.target.value)}
+                autoComplete="off"
               />
               {errors.display_name && <p className={s.errorMsg}>{errors.display_name}</p>}
+              <p className={s.hintMsg}>A name that can be easily Identified</p>
             </div>
 
             <div className={s.formGroup}>

@@ -304,6 +304,9 @@
 /* ─── Error message ─────────────────────────────────────── */
 .errorMsg { font-size: 12px; color: #dc2626; margin: 0; }
 
+/* ─── Hint message ──────────────────────────────────────── */
+.hintMsg { font-size: 12px; color: #6b7280; margin: 0; }
+
 /* ─── Form actions ──────────────────────────────────────── */
 .formActions {
   display: flex;

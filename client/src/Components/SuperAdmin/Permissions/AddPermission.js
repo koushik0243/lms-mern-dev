@@ -59,7 +59,7 @@ export default function AddPermission() {
       <h1 className={s.pageTitle}>Add Permission</h1>
       <p className={s.pageSubtitle}>Create a new system permission</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.formCard}>
           <div className={s.formGrid}>
 
@@ -71,6 +71,7 @@ export default function AddPermission() {
                 placeholder="e.g. add_courses"
                 value={form.name}
                 onChange={e => setField('name', e.target.value)}
+                autoComplete="off"
               />
               {errors.name && <p className={s.errorMsg}>{errors.name}</p>}
             </div>
@@ -83,6 +84,7 @@ export default function AddPermission() {
                 placeholder="e.g. Add Courses"
                 value={form.display_name}
                 onChange={e => setField('display_name', e.target.value)}
+                autoComplete="off"
               />
               {errors.display_name && <p className={s.errorMsg}>{errors.display_name}</p>}
             </div>

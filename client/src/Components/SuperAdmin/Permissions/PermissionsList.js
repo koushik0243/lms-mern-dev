@@ -54,13 +54,15 @@ export default function PermissionsList() {
   const [bulkConfirm, setBulkConfirm] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
     return () => clearTimeout(t);
   }, [search]);
 
-  useEffect(() => { setPage(1); }, [debouncedSearch]);
+  useEffect(() => { setPage(1); }, [debouncedSearch, sortKey, sortDir]);
 
   const fetchPermissions = useCallback(() => {
     setLoading(true);
@@ -78,9 +80,33 @@ export default function PermissionsList() {
 
   useEffect(() => { fetchPermissions(); }, [fetchPermissions]);
 
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
   const filtered = debouncedSearch
-    ? permissions.filter(p => (p.name || '').toLowerCase().includes(debouncedSearch.toLowerCase()))
+    ? permissions.filter(p =>
+        (p.name || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (p.display_name || '').toLowerCase().includes(debouncedSearch.toLowerCase())
+      )
     : permissions;
+
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        const isDate = ['createdAt', 'updatedAt', 'purchase_date', 'payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : filtered;
 
   async function handleSeedDefaults() {
     setSeeding(true);
@@ -113,7 +139,7 @@ export default function PermissionsList() {
       .catch(() => toast.error('Delete failed.'));
   }
 
-  const allIds = filtered.map(p => p._id);
+  const allIds = sorted.map(p => p._id);
   const allSelected = allIds.length > 0 && allIds.every(id => selected.includes(id));
   const toggleAll = () => setSelected(allSelected ? [] : allIds);
   const toggleOne = id => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -194,20 +220,20 @@ export default function PermissionsList() {
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
-                <th>Name</th>
-                <th>Display Name</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('name')}>Name{sortArrow('name')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('display_name')}>Display Name{sortArrow('display_name')}</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr className={s.emptyRow}><td colSpan={7}>Loading…</td></tr>
-              ) : filtered.length === 0 ? (
+              ) : sorted.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={7}>No permissions found.</td></tr>
-              ) : filtered.map((p, idx) => (
-                <tr key={p._id}>
+              ) : sorted.map((p, idx) => (
+                <tr key={p._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(p._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(p._id)} onChange={() => toggleOne(p._id)} /></td>
                   <td>{(page - 1) * LIMIT + idx + 1}</td>
                   <td><code style={{ fontSize: 12, background: '#f3f4f6', padding: '2px 6px', borderRadius: 4 }}>{p.name}</code></td>
@@ -219,7 +245,7 @@ export default function PermissionsList() {
                   </td>
                   <td>{fmtDate(p.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button
                         className={s.btnView}
                         title="View"

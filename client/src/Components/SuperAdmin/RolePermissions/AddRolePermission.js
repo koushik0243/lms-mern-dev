@@ -202,7 +202,7 @@ export default function AddRolePermission() {
       <h1 className={s.pageTitle}>{isEditing ? 'Edit Role Permissions' : 'Assign Role'}</h1>
       <p className={s.pageSubtitle}>{isEditing ? 'Update permissions for this role' : 'Attach permissions to a role'}</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.formCard}>
           <div className={s.formGrid}>
 
@@ -269,7 +269,7 @@ export default function AddRolePermission() {
                 )}
               </span>
               <label className={rp.selectAllLabel}>
-                <input type="checkbox" checked={allSelected} onChange={toggleAll} />
+                <input type="checkbox" checked={allSelected} onChange={toggleAll} autoComplete="off" />
                 Select All
               </label>
             </div>
@@ -291,6 +291,7 @@ export default function AddRolePermission() {
                           checked={allGroupChecked}
                           ref={el => { if (el) el.indeterminate = someGroupChecked && !allGroupChecked; }}
                           onChange={() => toggleGroup(key)}
+                          autoComplete="off"
                         />
                         All
                       </label>
@@ -302,6 +303,7 @@ export default function AddRolePermission() {
                             type="checkbox"
                             checked={selectedIds.has(p._id)}
                             onChange={() => togglePerm(p._id)}
+                            autoComplete="off"
                           />
                           <span className={rp.permAction}>{p.action || p.name}</span>
                         </label>

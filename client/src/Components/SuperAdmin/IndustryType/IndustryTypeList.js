@@ -206,7 +206,7 @@ export default function IndustryTypeList() {
               ) : pageItems.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={7}>No items found.</td></tr>
               ) : pageItems.map(item => (
-                <tr key={item._id}>
+                <tr key={item._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(item._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(item._id)} onChange={() => toggleOne(item._id)} /></td>
                   <td>
                     <div className={s.nameCell} style={{ paddingLeft: item.depth * 20 }}>
@@ -225,7 +225,7 @@ export default function IndustryTypeList() {
                   </td>
                   <td>{fmtDate(item.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button className={s.btnView} title="View"
                         onClick={() => router.push(`/superadmin/industry-type/${item._id}`)}>
                         {Icon.eye}

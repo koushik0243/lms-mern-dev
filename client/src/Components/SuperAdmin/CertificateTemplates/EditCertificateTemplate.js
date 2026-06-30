@@ -82,7 +82,7 @@ export default function EditCertificateTemplate() {
       {loading ? (
         <p style={{ color: '#6b7280', fontSize: 13 }}>Loading…</p>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <div className={s.card}>
             <div className={s.cardHeader}>{CertIcon} Template Information</div>
             <div className={s.cardBody}>
@@ -95,6 +95,7 @@ export default function EditCertificateTemplate() {
                     placeholder="Enter certificate template title"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
+                    autoComplete="off"
                   />
                   {errors.title && <span className={s.errorMsg}>{errors.title}</span>}
                 </div>

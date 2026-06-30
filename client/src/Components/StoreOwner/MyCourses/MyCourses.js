@@ -1,229 +1,276 @@
-﻿'use client';
+'use client';
 
-import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
-import { selectUser, clearAuth } from '../../../redux/slices/authSlice';
+import { useState, useEffect, useCallback } from 'react';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../../../redux/slices/authSlice';
+import apiServiceHandler from '../../../service/apiService';
+import { API_URL } from '../../../lib/constant';
 import s from './MyCourses.module.css';
 
-// ── Icons ────────────────────────────────────────────────────────
+// ── Icons ─────────────────────────────────────────────────────────
 const Icon = {
-  dashboard:    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 1116 0A8 8 0 012 10zm8-3a1 1 0 100 2 1 1 0 000-2zm-3 8a3 3 0 016 0H7z" /></svg>,
-  store:        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 000-2H3zm-1 4a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zm1 4a1 1 0 000 2h8a1 1 0 000-2H3z" /></svg>,
-  users:        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zm8 0a3 3 0 11-6 0 3 3 0 016 0zM6.865 14c.41-1.135 1.53-2 2.635-2h1c1.105 0 2.226.865 2.635 2H6.865zM1 14a5.002 5.002 0 019-3h.001A5 5 0 0119 14v1H1v-1z" /></svg>,
-  assign:       <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" /></svg>,
-  courses:      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4 7.962 7.962 0 009 5.189V4.804z" /></svg>,
-  track:        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-4a1 1 0 011-1h2a1 1 0 011 1v13a1 1 0 01-1 1h-2a1 1 0 01-1-1V3z" /></svg>,
-  reports:      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4-1a1 1 0 10-2 0v7a1 1 0 102 0V8z" clipRule="evenodd" /></svg>,
-  subscription: <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" /><path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" /></svg>,
-  credits:      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" /><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" /></svg>,
-  support:      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C15.802 8.249 16 9.1 16 10zm-5.165 3.913l1.58 1.58A5.98 5.98 0 0110 16a5.976 5.976 0 01-2.516-.552l1.562-1.562a4.006 4.006 0 001.789.027zm-4.677-2.796a4.002 4.002 0 01-.041-2.08l-.08.08-1.53-1.533A5.98 5.98 0 004 10c0 .954.223 1.856.619 2.657l1.54-1.54zm1.088-6.45A5.974 5.974 0 0110 4c.954 0 1.856.223 2.657.619l-1.54 1.54a4.002 4.002 0 00-2.346.033L7.246 4.668z" clipRule="evenodd" /></svg>,
-  logout:       <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" /></svg>,
-  bell:         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 01-2-2h4a2 2 0 01-2 2z" /></svg>,
-  help:         <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>,
-  pencil:       <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>,
-  trash:        <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>,
-  // overview stat icons
-  coursesStat:  <svg viewBox="0 0 20 20" fill="none" stroke="#0b7b7b" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4 7.962 7.962 0 009 5.189V4.804z" /></svg>,
-  videosStat:   <svg viewBox="0 0 20 20" fill="none" stroke="#0b7b7b" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 10v4a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-  bonusStat:    <svg viewBox="0 0 20 20" fill="none" stroke="#0b7b7b" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>,
-  certsStat:    <svg viewBox="0 0 20 20" fill="none" stroke="#0b7b7b" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>,
+  courses:  <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4 7.962 7.962 0 009 5.189V4.804z" /></svg>,
+  clock:    <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>,
+  chapters: <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>,
+  tag:      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>,
+  folder:   <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" /></svg>,
+  level:    <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>,
+  learners: <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 14.094A5.973 5.973 0 004 17v1H1v-1a3 3 0 013.75-2.906z" /></svg>,
+  check:    <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>,
+  draft:    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>,
+  inactive: <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524L13.477 14.89zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" /></svg>,
 };
 
-function NavItem({ icon, label, active, onClick }) {
-  return (
-    <button className={`${s.navItem} ${active ? s.navItemActive : ''}`} onClick={onClick}>
-      <span className={s.navIcon}>{icon}</span>
-      {label}
-    </button>
-  );
+function getTokenUserId() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const token = localStorage.getItem('adminToken');
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return payload._id || null;
+  } catch { return null; }
 }
 
-// ── Static data ───────────────────────────────────────────────────
-const OVERVIEW_STATS = [
-  { icon: 'coursesStat', label: 'Courses Assigned', value: '6' },
-  { icon: 'videosStat',  label: 'Total Videos',     value: '64' },
-  { icon: 'bonusStat',   label: 'Bonus Unlocks',    value: '24' },
-  { icon: 'certsStat',   label: 'Certs Issued',     value: '38' },
-];
-
-const COURSES = [
-  {
-    id: 1,
-    title: 'QC Basics',
-    meta: '3 Chapters . 11 Videos . AI Quiz Active',
-    published: true,
-    bonusOn: false,
-    chapters: [],
-  },
-  {
-    id: 2,
-    title: 'Safety at Workplace',
-    meta: '4 Chapters . 16 Videos . AI Quiz Active',
-    published: true,
-    bonusOn: true,
-    chapters: [
-      { name: 'Introduction To Workplace Hazards', status: 'Watched: 91/91', done: true },
-      { name: 'Emergency Protocols',               status: 'Watched: 88/91', done: true },
-      { name: 'PPE Usage Guide',                   status: 'Watched: 88/91', done: true },
-      { name: 'Final Assessment',                  status: 'In Progress',    done: false },
-    ],
-  },
-  {
-    id: 3,
-    title: 'Compliance & Ethics',
-    meta: '2 Chapters . 8 Videos',
-    published: true,
-    bonusOn: false,
-    chapters: [],
-  },
-  {
-    id: 4,
-    title: 'QC Basics',
-    meta: '3 Chapters . 11 Videos . AI Quiz Active',
-    published: true,
-    bonusOn: false,
-    chapters: [],
-  },
-];
+function fmtDuration(hr, min) {
+  const h = parseInt(hr, 10) || 0;
+  const m = parseInt(min, 10) || 0;
+  if (!h && !m) return null;
+  if (h && m) return `${h}h ${m}m`;
+  if (h) return `${h}h`;
+  return `${m}m`;
+}
 
 export default function MyCoursesPage() {
-  const user     = useSelector(selectUser);
-  const dispatch = useDispatch();
-  const router   = useRouter();
+  const user = useSelector(selectUser);
 
-  const userName = user?.name || user?.email || 'Store Owner';
-  const initials = userName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const [courses, setCourses]       = useState([]);
+  const [tagMap, setTagMap]         = useState({});   // _id → title
+  const [learnerMap, setLearnerMap] = useState({});   // courseId → learner count
+  const [loading, setLoading]       = useState(true);
 
-  function handleLogout() {
-    dispatch(clearAuth());
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('BHARAT_TOKEN');
+  const loadCourses = useCallback(async () => {
+    setLoading(true);
+    try {
+      // Resolve orgId
+      let effectiveOrgId = user?.orgId ? String(user.orgId) : null;
+      if (!effectiveOrgId) {
+        const uid = user?._id || getTokenUserId();
+        if (uid) {
+          const r = await apiServiceHandler('GET', `user/admin/edit/${uid}`);
+          const rec = r?.data ?? r;
+          if (rec?.orgId) effectiveOrgId = String(rec.orgId);
+        }
+      }
+      if (!effectiveOrgId) { setCourses([]); setLoading(false); return; }
+
+      // Four parallel requests:
+      // 1. org-course/list  → which courses are assigned + assignment status
+      // 2. course/list      → full course details (desc, catId, tagIds, level, chapters, image…)
+      // 3. tags/list        → tag names (tagIds in courses are raw IDs, not populated)
+      // 4. course-assignment/list → learner counts per course for this org
+      const [ocRes, courseRes, tagsRes, caRes] = await Promise.all([
+        apiServiceHandler('GET', `organization-course/list?orgId=${effectiveOrgId}`),
+        apiServiceHandler('GET', 'course/list'),
+        apiServiceHandler('GET', 'tags/list').catch(() => null),
+        apiServiceHandler('GET', `course-assignment/list?organizationId=${effectiveOrgId}`).catch(() => null),
+      ]);
+
+      const orgCourses = Array.isArray(ocRes?.data)    ? ocRes.data    : (Array.isArray(ocRes)    ? ocRes    : []);
+      const allCourses = Array.isArray(courseRes?.data) ? courseRes.data : (Array.isArray(courseRes) ? courseRes : []);
+      const allTags    = Array.isArray(tagsRes?.data)   ? tagsRes.data  : (Array.isArray(tagsRes)   ? tagsRes  : []);
+      const allCA      = Array.isArray(caRes?.data)     ? caRes.data    : (Array.isArray(caRes)     ? caRes    : []);
+
+      // tag _id → title
+      const tMap = {};
+      allTags.forEach(t => { if (t._id) tMap[String(t._id)] = t.title || t.name || ''; });
+      setTagMap(tMap);
+
+      // courseId → unique learner count
+      const lMap = {};
+      allCA.forEach(a => {
+        const cId = a.courseId?._id ? String(a.courseId._id) : (a.courseId ? String(a.courseId) : null);
+        if (!cId) return;
+        if (!lMap[cId]) lMap[cId] = new Set();
+        const uId = a.userId?._id ? String(a.userId._id) : (a.userId ? String(a.userId) : null);
+        if (uId) lMap[cId].add(uId);
+      });
+      const learnerCountMap = {};
+      Object.keys(lMap).forEach(cId => { learnerCountMap[cId] = lMap[cId].size; });
+      setLearnerMap(learnerCountMap);
+
+      // Build full course lookup: courseId → full course object
+      const courseMap = {};
+      allCourses.forEach(c => { if (c._id) courseMap[String(c._id)] = c; });
+
+      // Merge full course data into each org-course record
+      const enriched = orgCourses.map(item => {
+        const cId = item.courseId?._id
+          ? String(item.courseId._id)
+          : (item.courseId ? String(item.courseId) : null);
+        const full = cId ? courseMap[cId] : null;
+        return full
+          ? { ...item, courseId: { ...(typeof item.courseId === 'object' ? item.courseId : {}), ...full } }
+          : item;
+      });
+
+      setCourses(enriched);
+    } catch {
+      setCourses([]);
+    } finally {
+      setLoading(false);
     }
-    router.replace('/login');
-  }
+  }, [user?._id, user?.orgId]);
+
+  useEffect(() => { loadCourses(); }, [loadCourses]);
+
+  const total     = courses.length;
+  const published = courses.filter(c => (c.courseId?.status || '').toLowerCase() === 'published').length;
+  const draft     = courses.filter(c => (c.courseId?.status || '').toLowerCase() === 'draft').length;
+  const inactive  = courses.filter(c => (c.status || '').toLowerCase() === 'inactive').length;
+
+  const STATS = [
+    { icon: 'courses',  label: 'Total Courses',  value: total },
+    { icon: 'check',    label: 'Published',       value: published },
+    { icon: 'draft',    label: 'Draft',           value: draft },
+    { icon: 'inactive', label: 'Inactive',        value: inactive },
+  ];
 
   return (
-    <div className={s.shell}>
-      {/* ── Sidebar ── */}
-      <aside className={s.sidebar}>
-        <div className={s.sidebarLogo}><span className={s.logoD}>sikhø</span><span className={s.logoA}>aur</span><span className={s.logoD}>badhø</span></div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Overview</div>
-          <NavItem icon={Icon.dashboard} label="Dashboard"    onClick={() => router.push('/storeowner/dashboard')} />
-          <NavItem icon={Icon.store}     label="Store Profile" onClick={() => router.push('/storeowner/profile')} />
-        </div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Learners</div>
-          <NavItem icon={Icon.users}  label="User Management" onClick={() => router.push('/storeowner/users')} />
-          <NavItem icon={Icon.assign} label="Assign Courses"  onClick={() => router.push('/storeowner/assign-courses')} />
-        </div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Content</div>
-          <NavItem icon={Icon.courses} label="My Courses" active onClick={() => router.push('/storeowner/my-courses')} />
-        </div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Analytics</div>
-          <NavItem icon={Icon.track}   label="Track & Analysis" onClick={() => router.push('/storeowner/track-analysis')} />
-          <NavItem icon={Icon.reports} label="Reports"          onClick={() => router.push('/storeowner/reports')} />
-        </div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Account</div>
-          <NavItem icon={Icon.subscription} label="Subscription" onClick={() => router.push('/storeowner/subscription')} />
-          <NavItem icon={Icon.credits}      label="Credits"      onClick={() => router.push('/storeowner/credits')} />
-          <NavItem icon={Icon.support}      label="Support"      onClick={() => router.push('/storeowner/support')} />
-        </div>
-
-        <div className={s.sidebarSpacer} />
-        <div className={s.sidebarFooter}>
-          <NavItem icon={Icon.logout} label="Log Out" onClick={handleLogout} />
-        </div>
-      </aside>
-
-      {/* ── Main ── */}
-      <div className={s.main}>
-        {/* Topbar */}
-        <header className={s.topbar}>
-          <div className={s.breadcrumb}>
-            Store Owner / <strong>My Courses</strong>
-          </div>
-          <div className={s.topbarActions}>
-            <button className={s.btnAddLearner} onClick={() => router.push('/storeowner/add-learner')}>
-              + Add Learner
-            </button>
-            <button className={s.iconBtn} title="Help">{Icon.help}</button>
-            <button className={s.iconBtn} title="Notifications">{Icon.bell}</button>
-            <button className={s.avatarBtn} title={userName}>{initials}</button>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div className={s.content}>
-
-          {/* ── Overview stats ── */}
-          <div className={s.card}>
-            <h2 className={s.cardTitle}>Overview</h2>
-            <div className={s.statsGrid}>
-              {OVERVIEW_STATS.map(stat => (
-                <div key={stat.label} className={s.statCard}>
-                  <div className={s.statIcon}>{Icon[stat.icon]}</div>
-                  <div className={s.statLabel}>{stat.label}</div>
-                  <div className={s.statValue}>{stat.value}</div>
-                </div>
-              ))}
+    <>
+      {/* ── Stats ── */}
+      <div className={s.card}>
+        <h2 className={s.cardTitle}>Overview</h2>
+        <div className={s.statsGrid}>
+          {STATS.map(st => (
+            <div key={st.label} className={s.statCard}>
+              <div className={s.statIcon}>{Icon[st.icon]}</div>
+              <div className={s.statLabel}>{st.label}</div>
+              <div className={s.statValue}>{loading ? '—' : st.value}</div>
             </div>
-          </div>
-
-          {/* ── Course Chapters & Videos ── */}
-          <div className={s.card}>
-            <h2 className={s.cardTitle}>Course Chapters &amp; Videos</h2>
-
-            <div className={s.courseList}>
-              {COURSES.map((course, ci) => (
-                <div key={course.id} className={`${s.courseBlock} ${ci < COURSES.length - 1 ? s.courseBlockBorder : ''}`}>
-                  {/* Course header row */}
-                  <div className={s.courseRow}>
-                    <div className={s.courseInfo}>
-                      <div className={s.courseTitle}>{course.title}</div>
-                      <div className={s.courseMeta}>{course.meta}</div>
-                    </div>
-                    <div className={s.courseActions}>
-                      {course.published && (
-                        <span className={s.badgePublished}>PUBLISHED</span>
-                      )}
-                      {course.bonusOn && (
-                        <span className={s.badgeBonusOn}>BONUS ON</span>
-                      )}
-                      <button className={s.iconActionBtn} title="Edit">{Icon.pencil}</button>
-                      <button className={`${s.iconActionBtn} ${s.iconActionBtnRed}`} title="Delete">{Icon.trash}</button>
-                    </div>
-                  </div>
-
-                  {/* Chapter list (if expanded) */}
-                  {course.chapters.length > 0 && (
-                    <div className={s.chapterList}>
-                      {course.chapters.map((ch, chi) => (
-                        <div key={chi} className={s.chapterRow}>
-                          <span className={`${s.chapterDot} ${ch.done ? s.chapterDotDone : s.chapterDotProgress}`} />
-                          <span className={s.chapterName}>{ch.name}</span>
-                          <span className={`${s.chapterStatus} ${!ch.done ? s.chapterStatusProgress : ''}`}>{ch.status}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
+          ))}
         </div>
       </div>
-    </div>
+
+      {/* ── Course grid ── */}
+      <div className={s.card}>
+        <h2 className={s.cardTitle}>
+          Courses
+          {!loading && total > 0 && <span className={s.countPill}>{total}</span>}
+        </h2>
+
+        {loading ? (
+          <div className={s.courseGrid}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className={s.skeletonCard} />
+            ))}
+          </div>
+        ) : courses.length === 0 ? (
+          <div className={s.empty}>No courses assigned to this organisation yet.</div>
+        ) : (
+          <div className={s.courseGrid}>
+            {courses.map(item => {
+              const c = item.courseId || {};
+              const thumb = c.course_image ? `${API_URL}${c.course_image}` : null;
+              const duration = fmtDuration(c.duration_hr, c.duration_min);
+              const orgStatus = (item.status || 'active').toLowerCase();
+              const courseStatus = (c.status || 'published').toLowerCase();
+              const tags = Array.isArray(c.tagIds)
+                ? c.tagIds.map(t => {
+                    const id = t?._id ? String(t._id) : String(t);
+                    const name = t?.title || tagMap[id] || null;
+                    return name ? { id, name } : null;
+                  }).filter(Boolean)
+                : [];
+              const chapters = parseInt(c.totalChapters, 10) || 0;
+              const cId = item.courseId?._id
+                ? String(item.courseId._id)
+                : (item.courseId ? String(item.courseId) : null);
+              const learnerCount = cId != null ? (learnerMap[cId] ?? 0) : 0;
+              return (
+                <div key={item._id} className={s.courseCard}>
+                  {/* Thumbnail */}
+                  <div className={s.courseThumb}>
+                    {thumb
+                      ? <img src={thumb} alt={c.title} className={s.courseThumbImg} />
+                      : <div className={s.courseThumbPlaceholder}>{Icon.courses}</div>
+                    }
+                  </div>
+
+                  {/* Body */}
+                  <div className={s.courseCardBody}>
+                    <div className={s.courseCardTitle}>{c.title || '—'}</div>
+
+                    {/* Description */}
+                    {c.desc && (
+                      <div className={s.courseCardDesc}>{c.desc}</div>
+                    )}
+
+                    {/* Category */}
+                    {c.catId?.title && (
+                      <div className={s.courseCardRow}>
+                        <span className={s.rowIcon}>{Icon.folder}</span>
+                        <span className={s.catLabel}>{c.catId.title}</span>
+                      </div>
+                    )}
+
+                    {/* Tags */}
+                    {tags.length > 0 && (
+                      <div className={s.courseCardRow}>
+                        <span className={s.rowIcon}>{Icon.tag}</span>
+                        <div className={s.tagList}>
+                          {tags.map(t => (
+                            <span key={t.id} className={s.tagPill}>{t.name}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Level */}
+                    {c.level && (
+                      <div className={s.courseCardRow}>
+                        <span className={s.rowIcon}>{Icon.level}</span>
+                        <span className={`${s.badge} ${s.badgeLevel}`}>{c.level}</span>
+                      </div>
+                    )}
+
+                    {/* Chapters + Duration */}
+                    <div className={s.courseCardStats}>
+                      {chapters > 0 && (
+                        <span className={s.statChip}>
+                          {Icon.chapters}
+                          {chapters} Chapter{chapters !== 1 ? 's' : ''}
+                        </span>
+                      )}
+                      {duration && (
+                        <span className={s.statChip}>
+                          {Icon.clock}
+                          {duration}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Learner count */}
+                    <div className={s.learnerRow}>
+                      {Icon.learners}
+                      <span>{learnerCount} Learner{learnerCount !== 1 ? 's' : ''}</span>
+                    </div>
+
+                    {/* Status badges */}
+                    <div className={s.courseCardMeta}>
+                      <span className={`${s.badge} ${courseStatus === 'published' ? s.badgePublished : courseStatus === 'draft' ? s.badgeDraft : s.badgeInactive}`}>
+                        {courseStatus}
+                      </span>
+                      {orgStatus === 'inactive' && (
+                        <span className={`${s.badge} ${s.badgeInactive}`}>org inactive</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
   );
 }

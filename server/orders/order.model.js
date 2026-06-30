@@ -8,7 +8,7 @@ const OrderSchema = new Schema({
   purchase_date:   { type: Date, default: Date.now },
   payment_gateway: { type: String, default: 'manual' },
   deletedAt:       { type: Date, default: null },
-  status:          { type: String, enum: ['active', 'inactive'], default: 'active' },
+  status:          { type: String, enum: ['success', 'failed', 'pending', 'canceled', 'refunded'], default: 'pending' },
   createdAt:       { type: Date, default: Date.now },
   updatedAt:       { type: Date, default: Date.now },
 });

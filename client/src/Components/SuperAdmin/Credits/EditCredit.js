@@ -155,7 +155,7 @@ export default function EditCredit() {
       <h1 className={s.pageTitle}>Edit Credit</h1>
       <p className={s.pageSubtitle}>Update credit details</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.formCard}>
           <div className={s.formGrid}>
 
@@ -168,6 +168,7 @@ export default function EditCredit() {
                 placeholder="e.g. Basic"
                 value={form.title}
                 onChange={e => setField('title', e.target.value)}
+                autoComplete="off"
               />
               {errors.title && <p className={s.errorMsg}>{errors.title}</p>}
             </div>
@@ -185,6 +186,7 @@ export default function EditCredit() {
                   value={form.limit_to}
                   onChange={e => handleIntChange('limit_to', e)}
                   onBlur={handleLimitBlur}
+                  autoComplete="off"
                 />
               </div>
               {errors.limit_to && <p className={s.errorMsg}>{errors.limit_to}</p>}
@@ -201,6 +203,7 @@ export default function EditCredit() {
                 value={form.price}
                 onChange={handlePriceChange}
                 onBlur={handlePriceBlur}
+                autoComplete="off"
               />
               {errors.price && <p className={s.errorMsg}>{errors.price}</p>}
             </div>

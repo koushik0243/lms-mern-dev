@@ -83,6 +83,8 @@ export default function OrgCreditAssignmentList() {
   const [totalPages, setTotalPages] = useState(1);
   const [hoveredOrg, setHoveredOrg] = useState(null);
   const [confirm, setConfirm]     = useState({ show: false, id: null, label: '' });
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   const fetchRecords = useCallback(() => {
     setLoading(true);
@@ -110,6 +112,31 @@ export default function OrgCreditAssignmentList() {
           g.credits.some(c => c.title.toLowerCase().includes(term));
       })
     : grouped;
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  const sorted = sortKey === 'orgName'
+    ? [...filtered].sort((a, b) => {
+        const av = (a.orgName ?? '').toLowerCase();
+        const bv = (b.orgName ?? '').toLowerCase();
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : sortKey === 'assignedOn'
+      ? [...filtered].sort((a, b) => {
+          const av = new Date(a.credits[0]?.createdAt).getTime() || 0;
+          const bv = new Date(b.credits[0]?.createdAt).getTime() || 0;
+          return sortDir === 'asc' ? av - bv : bv - av;
+        })
+      : filtered;
 
   function doDelete() {
     const { id } = confirm;
@@ -160,10 +187,10 @@ export default function OrgCreditAssignmentList() {
             <thead>
               <tr>
                 <th>#</th>
-                <th>Organization</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('orgName')}>Organization{sortArrow('orgName')}</th>
                 <th>Assigned Credits</th>
                 <th>Status</th>
-                <th>Assigned On</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('assignedOn')}>Assigned On{sortArrow('assignedOn')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -173,7 +200,7 @@ export default function OrgCreditAssignmentList() {
               ) : filtered.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={6}>No credit assignments found.</td></tr>
               ) : (
-                filtered.flatMap((g, idx) => {
+                sorted.flatMap((g, idx) => {
                   const rows   = g.credits.length > 0 ? g.credits : [null];
                   const orgKey = g.orgId ?? idx;
                   const stripe  = idx % 2 !== 0 ? s.stripeAlt : '';

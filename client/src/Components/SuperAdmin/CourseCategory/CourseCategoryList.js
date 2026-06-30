@@ -61,6 +61,8 @@ export default function CourseCategoryList() {
   const [selected, setSelected]     = useState([]);
   const [confirm, setConfirm]       = useState({ show: false, id: null });
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 350);
@@ -118,6 +120,27 @@ export default function CourseCategoryList() {
     prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
   );
 
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  const sorted = sortKey
+    ? [...rows].sort((a, b) => {
+        const isDate = ['createdAt','updatedAt','purchase_date','payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime()||0; bv = new Date(bv).getTime()||0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : rows;
+
   const from = total === 0 ? 0 : (page - 1) * LIMIT + 1;
   const to   = Math.min(page * LIMIT, total);
 
@@ -169,10 +192,10 @@ export default function CourseCategoryList() {
                 <th className={s.checkTh}>
                   <input type="checkbox" checked={allSelected} onChange={toggleAll} />
                 </th>
-                <th>Name</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('title')}>Name{sortArrow('title')}</th>
                 <th>Description</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -181,8 +204,8 @@ export default function CourseCategoryList() {
                 <tr className={s.emptyRow}><td colSpan={6}>Loading…</td></tr>
               ) : rows.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={6}>No categories found.</td></tr>
-              ) : rows.map(row => (
-                <tr key={row._id}>
+              ) : sorted.map(row => (
+                <tr key={row._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(row._id)}>
                   <td className={s.checkTd}>
                     <input
                       type="checkbox"
@@ -205,7 +228,7 @@ export default function CourseCategoryList() {
                   </td>
                   <td>{fmtDate(row.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button className={s.btnView} title="View"
                         onClick={() => router.push(`/superadmin/course-category/${row._id}`)}>
                         {Icon.eye}

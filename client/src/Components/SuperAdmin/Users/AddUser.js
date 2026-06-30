@@ -19,6 +19,8 @@ export default function AddUser() {
   const [roles, setRoles]       = useState([]);
   const [errors, setErrors]     = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [pwReadOnly, setPwReadOnly] = useState(true);
+  const [confirmPwReadOnly, setConfirmPwReadOnly] = useState(true);
 
   useEffect(() => {
     apiServiceHandler('GET', 'role/list-pagination?limit=200&page=1&user_type=superadmin')
@@ -74,7 +76,7 @@ export default function AddUser() {
       <h1 className={s.pageTitle}>Add User</h1>
       <p className={s.pageSubtitle}>Create a new super admin user</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.formCard}>
           <div className={s.formGrid}>
 
@@ -86,6 +88,7 @@ export default function AddUser() {
                 placeholder="Full name"
                 value={form.name}
                 onChange={e => setField('name', e.target.value)}
+                autoComplete="off"
               />
               {errors.name && <p className={s.errorMsg}>{errors.name}</p>}
             </div>
@@ -98,6 +101,7 @@ export default function AddUser() {
                 placeholder="user@example.com"
                 value={form.email}
                 onChange={e => setField('email', e.target.value)}
+                autoComplete="off"
               />
               {errors.email && <p className={s.errorMsg}>{errors.email}</p>}
             </div>
@@ -111,6 +115,8 @@ export default function AddUser() {
                 value={form.password}
                 onChange={e => setField('password', e.target.value)}
                 autoComplete="new-password"
+                readOnly={pwReadOnly}
+                onFocus={() => setPwReadOnly(false)}
               />
               {errors.password && <p className={s.errorMsg}>{errors.password}</p>}
             </div>
@@ -124,6 +130,8 @@ export default function AddUser() {
                 value={form.confirm_password}
                 onChange={e => setField('confirm_password', e.target.value)}
                 autoComplete="new-password"
+                readOnly={confirmPwReadOnly}
+                onFocus={() => setConfirmPwReadOnly(false)}
               />
               {errors.confirm_password && <p className={s.errorMsg}>{errors.confirm_password}</p>}
             </div>

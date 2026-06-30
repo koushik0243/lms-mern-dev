@@ -92,7 +92,7 @@ export default function EditCourseSubCategory() {
 
       {errors.fetch && <p className={s.errorMsg}>{errors.fetch}</p>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.card}>
           <div className={s.cardHeader}>{LayersIcon} Select Category</div>
           <div className={s.cardBody}>
@@ -129,6 +129,7 @@ export default function EditCourseSubCategory() {
                     placeholder="Enter sub-category name"
                     value={name}
                     onChange={e => setName(e.target.value)}
+                    autoComplete="off"
                   />
                   {errors.name && <span className={s.errorMsg}>{errors.name}</span>}
                 </div>

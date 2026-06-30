@@ -81,6 +81,8 @@ export default function CategorySubcategoryList() {
   const [confirm, setConfirm]     = useState({ show: false, id: null, type: null });
   const [selected, setSelected]   = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   const fetchItems = useCallback(() => {
     setLoading(true);
@@ -151,12 +153,38 @@ export default function CategorySubcategoryList() {
     );
   }, [flatList, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / LIMIT));
-  const clampedPage = Math.min(page, totalPages);
-  const pageItems = filtered.slice((clampedPage - 1) * LIMIT, clampedPage * LIMIT);
+  useEffect(() => { setPage(1); }, [sortKey, sortDir]);
 
-  const from = filtered.length === 0 ? 0 : (clampedPage - 1) * LIMIT + 1;
-  const to   = Math.min(clampedPage * LIMIT, filtered.length);
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        if (sortKey === 'createdAt') {
+          const av = new Date(a.createdAt).getTime() || 0;
+          const bv = new Date(b.createdAt).getTime() || 0;
+          return sortDir === 'asc' ? av - bv : bv - av;
+        }
+        const av = String(a[sortKey] ?? '').toLowerCase();
+        const bv = String(b[sortKey] ?? '').toLowerCase();
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : filtered;
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / LIMIT));
+  const clampedPage = Math.min(page, totalPages);
+  const pageItems = sorted.slice((clampedPage - 1) * LIMIT, clampedPage * LIMIT);
+
+  const from = sorted.length === 0 ? 0 : (clampedPage - 1) * LIMIT + 1;
+  const to   = Math.min(clampedPage * LIMIT, sorted.length);
 
   function handleDelete(id, type, source) { setConfirm({ show: true, id, type, source }); }
   function doDelete() {
@@ -237,11 +265,11 @@ export default function CategorySubcategoryList() {
             <thead>
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
-                <th>Name</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('name')}>Name{sortArrow('name')}</th>
                 <th>Description</th>
                 <th>Parent</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -251,7 +279,7 @@ export default function CategorySubcategoryList() {
               ) : pageItems.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={7}>No items found.</td></tr>
               ) : pageItems.map((item) => (
-                <tr key={item._id}>
+                <tr key={item._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(item._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(item._id)} onChange={() => toggleOne(item._id)} /></td>
                   <td>
                     <div className={s.nameCell} style={{ paddingLeft: item.depth * 20 }}>
@@ -270,7 +298,7 @@ export default function CategorySubcategoryList() {
                   </td>
                   <td>{fmtDate(item.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button className={s.btnView} title="View"
                         onClick={() => router.push(
                           item.source === 'subcategory'
@@ -307,7 +335,7 @@ export default function CategorySubcategoryList() {
               </button>
             )}
             <span className={s.paginInfo}>
-              {filtered.length === 0 ? 'No results' : `Showing ${from}–${to} of ${filtered.length}`}
+              {sorted.length === 0 ? 'No results' : `Showing ${from}–${to} of ${sorted.length}`}
             </span>
           </div>
           <div className={s.paginBtns}>

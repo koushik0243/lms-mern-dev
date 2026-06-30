@@ -79,7 +79,7 @@ export default function EditTag() {
       {loading ? (
         <p style={{ color: '#6b7280', fontSize: 13 }}>Loading…</p>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <div className={s.card}>
             <div className={s.cardHeader}>{TagIcon} Tag Information</div>
             <div className={s.cardBody}>
@@ -92,6 +92,7 @@ export default function EditTag() {
                     placeholder="Enter tag name"
                     value={title}
                     onChange={e => setTitle(e.target.value)}
+                    autoComplete="off"
                   />
                   {errors.title && <span className={s.errorMsg}>{errors.title}</span>}
                 </div>

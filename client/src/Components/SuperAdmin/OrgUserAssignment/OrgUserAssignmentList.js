@@ -60,6 +60,8 @@ export default function OrgUserAssignmentList() {
   const [bulkConfirm, setBulkConfirm] = useState(false);
   const [orgs, setOrgs]               = useState([]);
   const [orgFilter, setOrgFilter]     = useState(urlOrgId);
+  const [sortKey, setSortKey]         = useState('');
+  const [sortDir, setSortDir]         = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
@@ -137,8 +139,29 @@ export default function OrgUserAssignmentList() {
       .catch(() => toast.error('Some removals failed'));
   }
 
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
   const from = total === 0 ? 0 : (page - 1) * LIMIT + 1;
   const to   = Math.min(page * LIMIT, total);
+
+  const sorted = sortKey
+    ? [...records].sort((a, b) => {
+        const isDate = ['createdAt', 'updatedAt', 'purchase_date', 'payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : records;
 
   return (
     <SuperAdminShell activeSection="assign-user">
@@ -201,10 +224,10 @@ export default function OrgUserAssignmentList() {
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
                 <th>Organization</th>
-                <th>User</th>
-                <th>Email</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('firstName')}>User{sortArrow('firstName')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('email')}>Email{sortArrow('email')}</th>
                 <th>Status</th>
-                <th>Assigned On</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Assigned On{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -213,8 +236,8 @@ export default function OrgUserAssignmentList() {
                 <tr className={s.emptyRow}><td colSpan={8}>Loading…</td></tr>
               ) : records.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={8}>No assigned users found.</td></tr>
-              ) : records.map((u, idx) => (
-                <tr key={u._id}>
+              ) : sorted.map((u, idx) => (
+                <tr key={u._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(u._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(u._id)} onChange={() => toggleOne(u._id)} /></td>
                   <td>{(page - 1) * LIMIT + idx + 1}</td>
                   <td>{u.orgId?.org_name || u.orgId?.name || '—'}</td>
@@ -227,7 +250,7 @@ export default function OrgUserAssignmentList() {
                   </td>
                   <td>{fmtDate(u.updatedAt || u.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button
                         className={s.btnView}
                         title="View"

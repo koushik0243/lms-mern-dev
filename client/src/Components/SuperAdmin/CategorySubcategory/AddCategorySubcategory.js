@@ -137,7 +137,7 @@ export default function AddCategorySubcategory() {
         <p className={s.pageSubtitle}>Create a new category or sub-category</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.card}>
           <div className={s.cardHeader}>{LayersIcon} Category Information</div>
           <div className={s.cardBody}>
@@ -152,6 +152,7 @@ export default function AddCategorySubcategory() {
                   placeholder="Enter name"
                   value={name}
                   onChange={e => setName(e.target.value)}
+                  autoComplete="off"
                 />
                 {errors.name && <span className={s.errorMsg}>{errors.name}</span>}
               </div>
@@ -208,6 +209,7 @@ export default function AddCategorySubcategory() {
                     accept="image/*"
                     className={s.imageFileInput}
                     onChange={handleImageChange}
+                    autoComplete="off"
                   />
                   <span className={s.imageUploadIcon}>
                     <svg viewBox="0 0 20 20" fill="currentColor" width="24" height="24">

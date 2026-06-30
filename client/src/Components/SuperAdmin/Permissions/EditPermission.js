@@ -79,7 +79,7 @@ export default function EditPermission() {
       {loading ? (
         <div style={{ padding: 24, color: '#6b7280' }}>Loading…</div>
       ) : (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <div className={s.formCard}>
             <div className={s.formGrid}>
 
@@ -91,6 +91,7 @@ export default function EditPermission() {
                   placeholder="e.g. add_courses"
                   value={form.name}
                   onChange={e => setField('name', e.target.value)}
+                  autoComplete="off"
                 />
                 {errors.name && <p className={s.errorMsg}>{errors.name}</p>}
               </div>
@@ -103,6 +104,7 @@ export default function EditPermission() {
                   placeholder="e.g. Add Courses"
                   value={form.display_name}
                   onChange={e => setField('display_name', e.target.value)}
+                  autoComplete="off"
                 />
                 {errors.display_name && <p className={s.errorMsg}>{errors.display_name}</p>}
               </div>

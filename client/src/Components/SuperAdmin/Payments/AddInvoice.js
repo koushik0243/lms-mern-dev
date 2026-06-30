@@ -6,12 +6,44 @@ import { toast } from 'sonner';
 import apiServiceHandler from '../../../service/apiService';
 import SuperAdminShell from '../SuperAdminShell';
 import s from './Payments.module.css';
+import AppDatePicker from '../AppDatePicker';
 
 const BackArrow = () => (
   <svg viewBox="0 0 20 20" fill="currentColor">
     <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
   </svg>
 );
+
+function Field({ label, name, type = 'text', placeholder, required, options, form, setField, errors, maxDate }) {
+  return (
+    <div className={s.formGroup}>
+      <label>{label}{required && <span className={s.required}> *</span>}</label>
+      {options ? (
+        <select className={s.select} value={form[name]} onChange={e => setField(name, e.target.value)}>
+          {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      ) : type === 'date' ? (
+        <AppDatePicker
+          className={s.input}
+          value={form[name]}
+          onChange={val => setField(name, val)}
+          placeholder={placeholder || 'Select date'}
+          maxDate={maxDate}
+        />
+      ) : (
+        <input
+          className={s.input}
+          type={type}
+          placeholder={placeholder}
+          value={form[name]}
+          onChange={e => setField(name, e.target.value)}
+          autoComplete="off"
+        />
+      )}
+      {errors[name] && <p className={s.errorMsg}>{errors[name]}</p>}
+    </div>
+  );
+}
 
 const EMPTY = {
   org_id: '', order_id: '',
@@ -109,26 +141,6 @@ export default function AddInvoice() {
     }
   }
 
-  const Field = ({ label, name, type = 'text', placeholder, required, options }) => (
-    <div className={s.formGroup}>
-      <label>{label}{required && <span className={s.required}> *</span>}</label>
-      {options ? (
-        <select className={s.select} value={form[name]} onChange={e => setField(name, e.target.value)}>
-          {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-      ) : (
-        <input
-          className={s.input}
-          type={type}
-          placeholder={placeholder}
-          value={form[name]}
-          onChange={e => setField(name, e.target.value)}
-        />
-      )}
-      {errors[name] && <p className={s.errorMsg}>{errors[name]}</p>}
-    </div>
-  );
-
   return (
     <SuperAdminShell activeSection="invoices">
       <button className={s.backBtn} onClick={() => router.push('/superadmin/payments/invoices')}>
@@ -137,7 +149,7 @@ export default function AddInvoice() {
       <h1 className={s.pageTitle}>Add Invoice</h1>
       <p className={s.pageSubtitle}>Create a new invoice</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
 
         {/* ── Order Info ── */}
         <div className={s.sectionLabel}>Order Details</div>
@@ -163,17 +175,17 @@ export default function AddInvoice() {
               </select>
               {errors.order_id && <p className={s.errorMsg}>{errors.order_id}</p>}
             </div>
-            <Field label="Currency" name="currency" placeholder="INR" />
-            <Field label="Payment Status" name="payment_status" options={[
+            <Field form={form} setField={setField} errors={errors}label="Currency" name="currency" placeholder="INR" />
+            <Field form={form} setField={setField} errors={errors}label="Payment Status" name="payment_status" options={[
               { value: 'pending', label: 'Pending' },
               { value: 'paid',    label: 'Paid' },
               { value: 'failed',  label: 'Failed' },
               { value: 'refunded',label: 'Refunded' },
             ]} />
-            <Field label="Payment Method" name="payment_method" placeholder="e.g. manual, netbanking, upi" />
-            <Field label="Transaction ID" name="transaction_id" placeholder="TXN-XXXXXXXXXX" />
-            <Field label="Payment Date" name="payment_date" type="date" />
-            <Field label="Status" name="status" options={[
+            <Field form={form} setField={setField} errors={errors}label="Payment Method" name="payment_method" placeholder="e.g. manual, netbanking, upi" />
+            <Field form={form} setField={setField} errors={errors}label="Transaction ID" name="transaction_id" placeholder="TXN-XXXXXXXXXX" />
+            <Field form={form} setField={setField} errors={errors} label="Payment Date" name="payment_date" type="date" maxDate={new Date()} />
+            <Field form={form} setField={setField} errors={errors}label="Status" name="status" options={[
               { value: 'active',   label: 'Active' },
               { value: 'inactive', label: 'Inactive' },
             ]} />
@@ -184,12 +196,12 @@ export default function AddInvoice() {
         <div className={s.sectionLabel}>Amounts</div>
         <div className={s.formCard}>
           <div className={s.formGrid}>
-            <Field label="Sub Total" name="sub_total" type="number" placeholder="0.00" required />
-            <Field label="Discount" name="discount" type="number" placeholder="0.00" />
-            <Field label="Tax" name="tax" type="number" placeholder="0.00" />
+            <Field form={form} setField={setField} errors={errors}label="Sub Total" name="sub_total" type="number" placeholder="0.00" required />
+            <Field form={form} setField={setField} errors={errors}label="Discount" name="discount" type="number" placeholder="0.00" />
+            <Field form={form} setField={setField} errors={errors}label="Tax" name="tax" type="number" placeholder="0.00" />
             <div className={s.formGroup}>
               <label>Total Amount</label>
-              <input className={s.input} type="number" value={form.total_amount} readOnly style={{ background: '#f9fafb' }} />
+              <input className={s.input} type="number" value={form.total_amount} readOnly style={{ background: '#f9fafb' }} autoComplete="off" />
             </div>
           </div>
         </div>
@@ -198,18 +210,18 @@ export default function AddInvoice() {
         <div className={s.sectionLabel}>Billing Details</div>
         <div className={s.formCard}>
           <div className={s.formGrid}>
-            <Field label="Name"     name="bill_name"    placeholder="Billing name" />
-            <Field label="Email"    name="bill_email"   type="email" placeholder="billing@example.com" />
-            <Field label="Phone"    name="bill_phone"   placeholder="+91 XXXXXXXXXX" />
-            <Field label="GST No"   name="bill_gst_no"  placeholder="GST number" />
+            <Field form={form} setField={setField} errors={errors}label="Name"     name="bill_name"    placeholder="Billing name" />
+            <Field form={form} setField={setField} errors={errors}label="Email"    name="bill_email"   type="email" placeholder="billing@example.com" />
+            <Field form={form} setField={setField} errors={errors}label="Phone"    name="bill_phone"   placeholder="+91 XXXXXXXXXX" />
+            <Field form={form} setField={setField} errors={errors}label="GST No"   name="bill_gst_no"  placeholder="GST number" />
             <div className={`${s.formGroup} ${s.formGroupFull}`}>
               <label>Address</label>
-              <input className={s.input} type="text" placeholder="Street address" value={form.bill_addr} onChange={e => setField('bill_addr', e.target.value)} />
+              <input className={s.input} type="text" placeholder="Street address" value={form.bill_addr} onChange={e => setField('bill_addr', e.target.value)} autoComplete="off" />
             </div>
-            <Field label="City"     name="bill_city"    placeholder="City" />
-            <Field label="State"    name="bill_state"   placeholder="State" />
-            <Field label="Country"  name="bill_country" placeholder="Country" />
-            <Field label="Pincode"  name="bill_pincode" placeholder="Pincode" />
+            <Field form={form} setField={setField} errors={errors}label="City"     name="bill_city"    placeholder="City" />
+            <Field form={form} setField={setField} errors={errors}label="State"    name="bill_state"   placeholder="State" />
+            <Field form={form} setField={setField} errors={errors}label="Country"  name="bill_country" placeholder="Country" />
+            <Field form={form} setField={setField} errors={errors}label="Pincode"  name="bill_pincode" placeholder="Pincode" />
           </div>
         </div>
 
@@ -217,18 +229,18 @@ export default function AddInvoice() {
         <div className={s.sectionLabel}>Shipping Details</div>
         <div className={s.formCard}>
           <div className={s.formGrid}>
-            <Field label="Name"     name="ship_name"    placeholder="Shipping name" />
-            <Field label="Email"    name="ship_email"   type="email" placeholder="shipping@example.com" />
-            <Field label="Phone"    name="ship_phone"   placeholder="+91 XXXXXXXXXX" />
-            <Field label="GST No"   name="ship_gst_no"  placeholder="GST number" />
+            <Field form={form} setField={setField} errors={errors}label="Name"     name="ship_name"    placeholder="Shipping name" />
+            <Field form={form} setField={setField} errors={errors}label="Email"    name="ship_email"   type="email" placeholder="shipping@example.com" />
+            <Field form={form} setField={setField} errors={errors}label="Phone"    name="ship_phone"   placeholder="+91 XXXXXXXXXX" />
+            <Field form={form} setField={setField} errors={errors}label="GST No"   name="ship_gst_no"  placeholder="GST number" />
             <div className={`${s.formGroup} ${s.formGroupFull}`}>
               <label>Address</label>
-              <input className={s.input} type="text" placeholder="Street address" value={form.ship_addr} onChange={e => setField('ship_addr', e.target.value)} />
+              <input className={s.input} type="text" placeholder="Street address" value={form.ship_addr} onChange={e => setField('ship_addr', e.target.value)} autoComplete="off" />
             </div>
-            <Field label="City"     name="ship_city"    placeholder="City" />
-            <Field label="State"    name="ship_state"   placeholder="State" />
-            <Field label="Country"  name="ship_country" placeholder="Country" />
-            <Field label="Pincode"  name="ship_pincode" placeholder="Pincode" />
+            <Field form={form} setField={setField} errors={errors}label="City"     name="ship_city"    placeholder="City" />
+            <Field form={form} setField={setField} errors={errors}label="State"    name="ship_state"   placeholder="State" />
+            <Field form={form} setField={setField} errors={errors}label="Country"  name="ship_country" placeholder="Country" />
+            <Field form={form} setField={setField} errors={errors}label="Pincode"  name="ship_pincode" placeholder="Pincode" />
           </div>
         </div>
 

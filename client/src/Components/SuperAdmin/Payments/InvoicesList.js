@@ -58,6 +58,8 @@ export default function InvoicesList() {
   const [confirm, setConfirm]       = useState({ show: false, id: null });
   const [selected, setSelected]     = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   const fetchInvoices = useCallback(() => {
     setLoading(true);
@@ -74,6 +76,15 @@ export default function InvoicesList() {
 
   useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
 
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
   const filtered = search
     ? invoices.filter(inv =>
         (inv.invoice_no || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -83,6 +94,20 @@ export default function InvoicesList() {
       )
     : invoices;
 
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        let av, bv;
+        if (sortKey === 'org_name') { av = (a.org_id?.org_name ?? '').toLowerCase(); bv = (b.org_id?.org_name ?? '').toLowerCase(); }
+        else if (sortKey === 'credit_title') { av = (a.order_id?.credit_id?.title ?? '').toLowerCase(); bv = (b.order_id?.credit_id?.title ?? '').toLowerCase(); }
+        else if (sortKey === 'total_amount') { return sortDir === 'asc' ? (Number(a.total_amount)||0) - (Number(b.total_amount)||0) : (Number(b.total_amount)||0) - (Number(a.total_amount)||0); }
+        else if (['payment_date','createdAt'].includes(sortKey)) { return sortDir === 'asc' ? (new Date(a[sortKey]).getTime()||0) - (new Date(b[sortKey]).getTime()||0) : (new Date(b[sortKey]).getTime()||0) - (new Date(a[sortKey]).getTime()||0); }
+        else { av = String(a[sortKey]||'').toLowerCase(); bv = String(b[sortKey]||'').toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : filtered;
+
   function doDelete() {
     const { id } = confirm;
     setConfirm({ show: false, id: null });
@@ -91,7 +116,7 @@ export default function InvoicesList() {
       .catch(() => toast.error('Delete failed.'));
   }
 
-  const allIds = filtered.map(inv => inv._id);
+  const allIds = sorted.map(inv => inv._id);
   const allSelected = allIds.length > 0 && allIds.every(id => selected.includes(id));
   const toggleAll = () => setSelected(allSelected ? [] : allIds);
   const toggleOne = id => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -157,30 +182,30 @@ export default function InvoicesList() {
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
-                <th>Invoice No</th>
-                <th>Organization</th>
-                <th>Credit Package</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('invoice_no')}>Invoice No{sortArrow('invoice_no')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('org_name')}>Organization{sortArrow('org_name')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('credit_title')}>Credit Package{sortArrow('credit_title')}</th>
                 <th>Sub Total</th>
                 <th>Discount</th>
                 <th>Tax</th>
-                <th>Total</th>
-                <th>Payment</th>
-                <th>Method</th>
-                <th>Payment Date</th>
-                <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('total_amount')}>Total{sortArrow('total_amount')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('payment_status')}>Payment{sortArrow('payment_status')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('payment_method')}>Method{sortArrow('payment_method')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('payment_date')}>Payment Date{sortArrow('payment_date')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('status')}>Status{sortArrow('status')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr className={s.emptyRow}><td colSpan={15}>Loading…</td></tr>
-              ) : filtered.length === 0 ? (
+              ) : sorted.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={15}>No invoices found.</td></tr>
-              ) : filtered.map((inv, idx) => {
+              ) : sorted.map((inv, idx) => {
                 const ps = PAYMENT_STATUS_COLORS[inv.payment_status] || { bg: '#f3f4f6', color: '#374151' };
                 return (
-                  <tr key={inv._id}>
+                  <tr key={inv._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(inv._id)}>
                     <td className={s.checkTd}><input type="checkbox" checked={selected.includes(inv._id)} onChange={() => toggleOne(inv._id)} /></td>
                     <td>{(page - 1) * LIMIT + idx + 1}</td>
                     <td style={{ fontFamily: 'monospace', fontSize: 12 }}>{inv.invoice_no || '—'}</td>
@@ -204,7 +229,7 @@ export default function InvoicesList() {
                     </td>
                     <td>{fmtDate(inv.createdAt)}</td>
                     <td>
-                      <div className={s.actions}>
+                      <div className={s.actions} onClick={e => e.stopPropagation()}>
                         <button className={s.btnView} title="View" onClick={() => router.push(`/superadmin/payments/invoices/view/${inv._id}`)}>
                           <EyeIcon />
                         </button>

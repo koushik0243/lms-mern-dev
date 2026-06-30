@@ -52,7 +52,7 @@ export const createOrgCreditAssignment = async (data, assignedBy = null) => {
             credit_amount:   creditAmount,
             purchase_date:   new Date(),
             payment_gateway: 'manual',
-            status:          'active',
+            status:          'success',
         }).save();
 
         await new Invoice({

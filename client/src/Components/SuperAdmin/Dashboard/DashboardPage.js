@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../../../redux/slices/authSlice';
@@ -8,164 +8,699 @@ import apiServiceHandler from '../../../service/apiService';
 import SuperAdminShell from '../SuperAdminShell';
 import s from './Dashboard.module.css';
 
-const Icons = {
-  course:   <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4 7.962 7.962 0 009 5.189V4.804z" /></svg>,
-  categ:    <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 3a1 1 0 000 2h11a1 1 0 100-2H3zm0 4a1 1 0 000 2h7a1 1 0 100-2H3zm0 4a1 1 0 000 2h4a1 1 0 100-2H3zm9 1a1 1 0 10-2 0v2.586l-.293-.293a1 1 0 10-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L12 14.586V12z" clipRule="evenodd" /></svg>,
-  subcat:   <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h3a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>,
-  tag:      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>,
-  cert:     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" /></svg>,
-  org:      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" /></svg>,
-  orgAdmin: <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>,
-  emp:      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg>,
-  credit:   <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" /><path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" /></svg>,
-  indust:   <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" /><path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" /></svg>,
-  user:     <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>,
-  role:     <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clipRule="evenodd" /></svg>,
-  perm:     <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" /></svg>,
-  order:    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z" /><path d="M16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" /></svg>,
-  invoice:  <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" /></svg>,
-};
+// ── Constants ─────────────────────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const COURSE_COLORS = ['#6366f1','#3b82f6','#10b981','#f59e0b','#ef4444'];
 
-/* ── One accent color per row (4 columns) ───────────────────────── */
-const ROW_ACCENTS = ['#0b7b7b', '#2563eb', '#7c3aed', '#d97706'];
-
-/* ── Stat boxes ─────────────────────────────────────────────────── */
-const DATA_BOXES = [
-  { key: 'courses',   label: 'Courses',             accent: '#0b7b7b', icon: Icons.course,   path: '/superadmin/course-builder',              fetch: () => apiServiceHandler('GET', 'course/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'categories',label: 'Categories',          accent: '#0284c7', icon: Icons.categ,    path: '/superadmin/category-subcategory',         fetch: () => apiServiceHandler('GET', 'course-category/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'subcats',   label: 'Sub-Categories',      accent: '#0369a1', icon: Icons.subcat,   path: '/superadmin/category-subcategory',         fetch: () => apiServiceHandler('GET', 'course-subcategory/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'tags',      label: 'Tags',                accent: '#059669', icon: Icons.tag,      path: '/superadmin/tags',                        fetch: () => apiServiceHandler('GET', 'tags/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'certs',     label: 'Cert. Templates',     accent: '#7c3aed', icon: Icons.cert,     path: '/superadmin/certificate-template',        fetch: () => apiServiceHandler('GET', 'certificate-template/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'orgs',      label: 'Organizations',       accent: '#2563eb', icon: Icons.org,      path: '/superadmin/organizations',               fetch: () => apiServiceHandler('GET', 'organization/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'orgAdmins', label: 'Org Admins',          accent: '#7c3aed', icon: Icons.orgAdmin, path: '/superadmin/organizations',               fetch: () => apiServiceHandler('GET', 'user/admin/list-pagination?page=1&limit=1&user_type=organization&orgRole=admin').then(r => r?.total ?? 0) },
-  { key: 'employees', label: 'Employees',           accent: '#db2777', icon: Icons.emp,      path: '/superadmin/employees',                   fetch: () => apiServiceHandler('GET', 'user/admin/list-pagination?page=1&limit=1&user_type=employee').then(r => r?.total ?? 0) },
-  { key: 'credits',   label: 'Credits',             accent: '#d97706', icon: Icons.credit,   path: '/superadmin/organization-credit-assignment', fetch: () => apiServiceHandler('GET', 'credit/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'industry',  label: 'Industry Types',      accent: '#b45309', icon: Icons.indust,   path: '/superadmin/industry-type',               fetch: () => apiServiceHandler('GET', 'industry-type/list-all').then(r => Array.isArray(r?.data) ? r.data.length : Array.isArray(r) ? r.length : 0) },
-  { key: 'users',     label: 'Admin Users',         accent: '#6d28d9', icon: Icons.user,     path: '/superadmin/user',                        fetch: () => apiServiceHandler('GET', 'user/admin/list-pagination?page=1&limit=1&user_type=superadmin').then(r => r?.total ?? 0) },
-  { key: 'roles',     label: 'Roles',               accent: '#dc2626', icon: Icons.role,     path: '/superadmin/roles',                       fetch: () => apiServiceHandler('GET', 'role/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'roleperms', label: 'Role Permissions',    accent: '#64748b', icon: Icons.perm,     path: '/superadmin/role-permissions',            fetch: () => apiServiceHandler('GET', 'role-permission/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'orders',    label: 'Orders',              accent: '#16a34a', icon: Icons.order,    path: '/superadmin/payments/orders',             fetch: () => apiServiceHandler('GET', 'order/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
-  { key: 'invoices',  label: 'Invoices',            accent: '#9333ea', icon: Icons.invoice,  path: '/superadmin/payments/invoices',           fetch: () => apiServiceHandler('GET', 'invoice/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+const ALL_FETCHES = [
+  { key: 'courses',      fetch: () => apiServiceHandler('GET', 'course/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'orgs',         fetch: () => apiServiceHandler('GET', 'organization/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'employees',    fetch: () => apiServiceHandler('GET', 'user/admin/list-pagination?page=1&limit=1&user_type=employee').then(r => r?.total ?? 0) },
+  { key: 'orders',       fetch: () => apiServiceHandler('GET', 'order/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'invoices',     fetch: () => apiServiceHandler('GET', 'invoice/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'credits',      fetch: () => apiServiceHandler('GET', 'credit/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'categories',   fetch: () => apiServiceHandler('GET', 'course-category/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'certs',        fetch: () => apiServiceHandler('GET', 'certificate-template/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'tags',         fetch: () => apiServiceHandler('GET', 'tags/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'users',        fetch: () => apiServiceHandler('GET', 'user/admin/list-pagination?page=1&limit=1&user_type=superadmin&deletedAt=null').then(r => r?.total ?? 0) },
+  { key: 'orgAdmins',    fetch: () => apiServiceHandler('GET', 'user/admin/list-pagination?page=1&limit=1&user_type=organization&orgRole=admin&deletedAt=null').then(r => r?.total ?? 0) },
+  { key: 'learners',     fetch: () => apiServiceHandler('GET', 'user/admin/list-pagination?page=1&limit=1&user_type=employee&orgRole=employee&deletedAt=null').then(r => r?.total ?? 0) },
+  { key: 'industryType', fetch: () => apiServiceHandler('GET', 'industry-type/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
+  { key: 'roles',        fetch: () => apiServiceHandler('GET', 'role/list-pagination?page=1&limit=1').then(r => r?.total ?? 0) },
 ];
 
-/* ── Mini bar chart ────────────────────────────────────────────── */
-function MiniBarChart({ accent = '#7c3aed' }) {
-  const heights = [25, 35, 28, 45, 38, 55, 48, 70];
-  const maxH = 44;
-  const barW = 5;
-  const gapW = 2;
-  const totalW = heights.length * (barW + gapW) - gapW;
-  return (
-    <svg width={totalW} height={maxH} viewBox={`0 0 ${totalW} ${maxH}`} style={{ display: 'block' }}>
-      {heights.map((h, i) => (
-        <rect
-          key={i}
-          x={i * (barW + gapW)}
-          y={maxH - h * (maxH / 70)}
-          width={barW}
-          height={h * (maxH / 70)}
-          rx="2"
-          fill={accent}
-          opacity={0.18 + (i / (heights.length - 1)) * 0.82}
-        />
-      ))}
-    </svg>
-  );
-}
-
-/* ── Helpers ───────────────────────────────────────────────────── */
-function fmtCount(n) {
+// ── Helpers ───────────────────────────────────────────────────────────
+function fmt(n) {
   if (n === null || n === undefined) return '—';
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
   return String(n);
 }
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
+function fmtAmt(n) {
+  if (!n) return '₹0';
+  if (n >= 1_000_000) return `₹${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000)     return `₹${(n / 1_000).toFixed(1)}K`;
+  return `₹${n.toFixed(2)}`;
 }
 
-function formatDate() {
-  return new Date().toLocaleDateString('en-IN', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+function fmtRevenue(n) {
+  if (!n) return '₹0';
+  if (n >= 1_000_000) return `₹${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000)     return `₹${(n / 1_000).toFixed(1)}K`;
+  return `₹${n.toFixed(0)}`;
+}
+
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const secs = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+  if (secs < 60)    return 'just now';
+  if (secs < 3600)  return `${Math.floor(secs / 60)} min ago`;
+  if (secs < 86400) return `${Math.floor(secs / 3600)} hr ago`;
+  return `${Math.floor(secs / 86400)} days ago`;
+}
+
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
+
+const AVATAR_COLORS = ['#6366f1','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899'];
+function avatarColor(str) {
+  if (!str) return AVATAR_COLORS[0];
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+// ── Icons ─────────────────────────────────────────────────────────────
+const StudentsIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+);
+const CoursesIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+  </svg>
+);
+const EnrollIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
+const RevenueIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+  </svg>
+);
+const OrgsIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+  </svg>
+);
+
+// ── KPI Card ──────────────────────────────────────────────────────────
+function KpiCard({ icon, iconBg, iconColor, label, value, loading, trend }) {
+  return (
+    <div className={s.kpiCard}>
+      <div className={s.kpiTop}>
+        <div className={s.kpiIcon} style={{ background: iconBg, color: iconColor }}>{icon}</div>
+        <div className={s.kpiText}>
+          <div className={s.kpiLabel}>{label}</div>
+          <div className={s.kpiValue}>
+            {loading ? <span className={s.skel} style={{ width: 56, height: 22, display: 'inline-block' }} /> : fmt(value)}
+          </div>
+        </div>
+      </div>
+      <div className={s.kpiTrend}>
+        <svg viewBox="0 0 16 10" fill="none" stroke="#16a34a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: 14, height: 10 }}>
+          <polyline points="1 9 5 4 9 6 15 1"/><polyline points="11 1 15 1 15 5"/>
+        </svg>
+        <span className={s.kpiTrendPct}>{trend}%</span>
+        <span className={s.kpiTrendLbl}>from last month</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Enrollment Line Chart ─────────────────────────────────────────────
+function EnrollLineChart({ data }) {
+  if (!data || data.length < 2) {
+    return <div className={s.chartEmpty}>No enrollment data for this period</div>;
+  }
+  const W = 560, H = 200, PL = 36, PR = 16, PT = 16, PB = 36;
+  const cW = W - PL - PR, cH = H - PT - PB;
+  const maxV = Math.max(...data.map(d => d.value), 1);
+  const ySteps = 4;
+
+  const pts = data.map((d, i) => [
+    PL + (i / (data.length - 1)) * cW,
+    PT + (1 - d.value / maxV) * cH,
+  ]);
+
+  let linePath = '', areaPath = '';
+  pts.forEach(([x, y], i) => {
+    if (i === 0) {
+      linePath = `M ${x} ${y}`;
+      areaPath = `M ${x} ${PT + cH} L ${x} ${y}`;
+    } else {
+      const [px, py] = pts[i - 1];
+      const cpx = (px + x) / 2;
+      linePath += ` C ${cpx} ${py} ${cpx} ${y} ${x} ${y}`;
+      areaPath += ` C ${cpx} ${py} ${cpx} ${y} ${x} ${y}`;
+    }
   });
+  areaPath += ` L ${pts[pts.length - 1][0]} ${PT + cH} Z`;
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block', overflow: 'visible' }}>
+      <defs>
+        <linearGradient id="elGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* Y-axis grid lines */}
+      {Array.from({ length: ySteps + 1 }, (_, i) => {
+        const y = PT + (i / ySteps) * cH;
+        const val = Math.round(maxV * (1 - i / ySteps));
+        return (
+          <g key={i}>
+            <line x1={PL} y1={y} x2={PL + cW} y2={y} stroke="#f3f4f6" strokeWidth="1" />
+            <text x={PL - 6} y={y + 4} textAnchor="end" fontSize="10" fill="#9ca3af">
+              {val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val}
+            </text>
+          </g>
+        );
+      })}
+      {/* Area fill */}
+      <path d={areaPath} fill="url(#elGrad)" />
+      {/* Line */}
+      <path d={linePath} fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Data points */}
+      {pts.map(([x, y], i) => (
+        <circle key={i} cx={x} cy={y} r="4" fill="#fff" stroke="#3b82f6" strokeWidth="2" />
+      ))}
+      {/* X labels */}
+      {data.map((d, i) => (
+        <text key={i} x={pts[i][0]} y={H - 6} textAnchor="middle" fontSize="10" fill="#9ca3af">
+          {d.label}
+        </text>
+      ))}
+    </svg>
+  );
 }
 
-/* ── Component ─────────────────────────────────────────────────── */
+// ── Donut Chart ───────────────────────────────────────────────────────
+function DonutChart({ segments, total }) {
+  const R = 62, sw = 22, viewSize = (R + sw) * 2 + 4;
+  const cx = viewSize / 2, cy = viewSize / 2;
+  const C = 2 * Math.PI * R;
+  const safeTotal = total || 1;
+
+  let cum = 0;
+  return (
+    <svg width={viewSize} height={viewSize} viewBox={`0 0 ${viewSize} ${viewSize}`} style={{ display: 'block', flexShrink: 0 }}>
+      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#f3f4f6" strokeWidth={sw} />
+      {segments.map((seg, i) => {
+        const dash = (seg.v / safeTotal) * C;
+        const offset = C - cum;
+        cum += dash;
+        return (
+          <circle
+            key={i}
+            cx={cx} cy={cy} r={R}
+            fill="none"
+            stroke={seg.c}
+            strokeWidth={sw}
+            strokeDasharray={`${dash} ${C - dash}`}
+            strokeDashoffset={offset}
+            style={{ transform: `rotate(-90deg)`, transformOrigin: `${cx}px ${cy}px` }}
+          />
+        );
+      })}
+      <text x={cx} y={cy - 5} textAnchor="middle" fontSize="20" fontWeight="800" fill="#111827">{fmt(total)}</text>
+      <text x={cx} y={cy + 13} textAnchor="middle" fontSize="11" fill="#9ca3af">Total</text>
+    </svg>
+  );
+}
+
+// ── Status Badge ──────────────────────────────────────────────────────
+function StatusBadge({ status }) {
+  const map = {
+    success:  { bg: '#f0fdf4', color: '#16a34a', border: '#bbf7d0', label: 'Success' },
+    pending:  { bg: '#fffbeb', color: '#d97706', border: '#fde68a', label: 'Pending' },
+    failed:   { bg: '#fef2f2', color: '#dc2626', border: '#fecaca', label: 'Failed' },
+    canceled: { bg: '#f8fafc', color: '#64748b', border: '#e2e8f0', label: 'Canceled' },
+    refunded: { bg: '#f5f3ff', color: '#7c3aed', border: '#ddd6fe', label: 'Refunded' },
+  };
+  const style = map[(status || '').toLowerCase()] || map.pending;
+  return (
+    <span style={{
+      display: 'inline-block',
+      background: style.bg,
+      color: style.color,
+      border: `1px solid ${style.border}`,
+      borderRadius: 20,
+      fontSize: 10,
+      fontWeight: 700,
+      padding: '2px 10px',
+      whiteSpace: 'nowrap',
+    }}>
+      {style.label}
+    </span>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────
 export default function DashboardPage() {
   const router = useRouter();
-  const user   = useSelector(selectUser);
-  const name   = user?.name?.split(' ')[0] || 'Admin';
+  const user = useSelector(selectUser);
+  const adminName = user?.name || user?.email?.split('@')[0] || 'Admin';
 
-  const [counts, setCounts] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [counts, setCounts]           = useState({});
+  const [loading, setLoading]         = useState(true);
+  const [dashData, setDashData]       = useState({
+    recentOrders: [], topCourses: [], topOrgs: [], recentEnrollments: [],
+    revenue: 0, totalEnrollments: 0,
+  });
+  const [rawOrgCourses, setRawOrgCourses] = useState([]);
+  const [chartYear, setChartYear]         = useState(new Date().getFullYear());
+  const [chartMonth, setChartMonth]       = useState(-1);
+  const [dashLoading, setDashLoading] = useState(true);
+  const [orgRows, setOrgRows]         = useState([]);
+  const [orgRowsLoading, setOrgRowsLoading] = useState(true);
 
+  // ── KPI totals ──────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
-    Promise.allSettled(DATA_BOXES.map(b => b.fetch().then(v => ({ key: b.key, val: v }))))
-      .then(results => {
-        if (cancelled) return;
-        const map = {};
-        results.forEach(r => { if (r.status === 'fulfilled') map[r.value.key] = r.value.val; });
-        setCounts(map);
-        setLoading(false);
-      });
+    Promise.allSettled(ALL_FETCHES.map(f => f.fetch().then(v => ({ key: f.key, val: v })))).then(results => {
+      if (cancelled) return;
+      const map = {};
+      results.forEach(r => { if (r.status === 'fulfilled') map[r.value.key] = r.value.val; });
+      setCounts(map);
+      setLoading(false);
+    });
     return () => { cancelled = true; };
   }, []);
 
+  // ── Detailed dashboard data ─────────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    Promise.allSettled([
+      apiServiceHandler('GET', 'order/list-pagination?page=1&limit=100'),
+      apiServiceHandler('GET', 'organization-course/list'),
+    ]).then(([ordersRes, orgCoursesRes]) => {
+      if (cancelled) return;
+
+      const orders = ordersRes.status === 'fulfilled' ? (Array.isArray(ordersRes.value?.data) ? ordersRes.value.data : []) : [];
+      const orgCourses = orgCoursesRes.status === 'fulfilled' ? (Array.isArray(orgCoursesRes.value?.data) ? orgCoursesRes.value.data : []) : [];
+
+      const revenue = orders.reduce((sum, o) => sum + (parseFloat(o.credit_amount) || 0), 0);
+
+      const recentOrders = [...orders]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
+        .map(o => ({
+          orderId: `#ORD-${String(o._id || '').slice(-5).toUpperCase()}`,
+          company: o.organizer_id?.org_name || '—',
+          amount: `₹${(parseFloat(o.credit_amount) || 0).toFixed(0)}`,
+          status: (o.status || 'pending').toLowerCase(),
+        }));
+
+      const cMap = {}, cNames = {};
+      orgCourses.forEach(item => {
+        const cid = (typeof item.courseId === 'object' ? item.courseId?._id : item.courseId)?.toString();
+        if (!cid) return;
+        cMap[cid] = (cMap[cid] ?? 0) + 1;
+        if (item.courseId?.title) cNames[cid] = item.courseId.title;
+      });
+      const topCourses = Object.entries(cMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([id, count]) => ({ id, name: cNames[id] || 'Unnamed Course', enrollments: count }));
+
+      const oMap = {}, oNames = {};
+      orgCourses.forEach(item => {
+        const oid = (typeof item.orgId === 'object' ? item.orgId?._id : item.orgId)?.toString();
+        if (!oid) return;
+        oMap[oid] = (oMap[oid] ?? 0) + 1;
+        if (item.orgId?.org_name) oNames[oid] = item.orgId.org_name;
+      });
+      const topOrgs = Object.entries(oMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([id, count]) => ({ id, name: oNames[id] || 'Unknown Org', enrollments: count }));
+
+      const recentEnrollments = [...orgCourses]
+        .filter(item => item.createdAt)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
+        .map(item => ({
+          name: item.orgId?.org_name || '—',
+          course: item.courseId?.title || '—',
+          time: item.createdAt,
+        }));
+
+      setRawOrgCourses(orgCourses);
+      setDashData({ recentOrders, topCourses, topOrgs, recentEnrollments, revenue, totalEnrollments: orgCourses.length });
+      setDashLoading(false);
+    }).catch(() => { if (!cancelled) setDashLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // ── Overview table (org breakdown) ─────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    apiServiceHandler('GET', 'organization/list-pagination?page=1&limit=10')
+      .then(async r => {
+        if (cancelled) return;
+        const items = Array.isArray(r?.data) ? r.data : [];
+        if (items.length === 0) { setOrgRows([]); setOrgRowsLoading(false); return; }
+
+        const toId = v => (typeof v === 'object' ? v?._id : v)?.toString() ?? null;
+
+        const [adminsRes, learnersRes, coursesRes, ordersRes] = await Promise.allSettled([
+          apiServiceHandler('GET', 'user/admin/list-pagination?user_type=organization&orgRole=admin&deletedAt=null&limit=500&page=1'),
+          apiServiceHandler('GET', 'user/admin/list-pagination?user_type=employee&orgRole=employee&deletedAt=null&limit=500&page=1'),
+          apiServiceHandler('GET', 'organization-course/list'),
+          apiServiceHandler('GET', 'order/list-pagination?limit=1000&page=1'),
+        ]);
+
+        if (cancelled) return;
+
+        const allAdmins   = adminsRes.status   === 'fulfilled' ? (Array.isArray(adminsRes.value?.data)   ? adminsRes.value.data   : []) : [];
+        const allLearners = learnersRes.status === 'fulfilled' ? (Array.isArray(learnersRes.value?.data) ? learnersRes.value.data : []) : [];
+
+        const courseMap = {};
+        if (coursesRes.status === 'fulfilled') {
+          (Array.isArray(coursesRes.value?.data) ? coursesRes.value.data : [])
+            .forEach(item => { const id = toId(item.orgId); if (id) courseMap[id] = (courseMap[id] ?? 0) + 1; });
+        }
+        const orderMap = {};
+        if (ordersRes.status === 'fulfilled') {
+          (Array.isArray(ordersRes.value?.data) ? ordersRes.value.data : [])
+            .forEach(order => {
+              const id = toId(order.organizer_id);
+              const amt = parseFloat(order.credit_amount) || 0;
+              if (id && amt > 0) orderMap[id] = (orderMap[id] ?? 0) + amt;
+            });
+        }
+
+        setOrgRows(items.map(org => {
+          const id = org._id?.toString();
+          const adminCount = allAdmins.filter(u =>
+            u.user_type === 'organization' && u.orgRole === 'admin' && !u.deletedAt && toId(u.orgId) === id
+          ).length;
+          const learnerCount = allLearners.filter(u =>
+            u.user_type === 'employee' && u.orgRole === 'employee' && !u.deletedAt && toId(u.orgId) === id
+          ).length;
+          return { ...org, _adminCount: adminCount, _courseCount: courseMap[id] ?? 0, _learnerCount: learnerCount, _orderAmount: orderMap[id] ?? 0 };
+        }));
+        setOrgRowsLoading(false);
+      })
+      .catch(() => { if (!cancelled) { setOrgRows([]); setOrgRowsLoading(false); } });
+    return () => { cancelled = true; };
+  }, []);
+
+  const availYears = useMemo(() => {
+    const years = new Set();
+    rawOrgCourses.forEach(item => {
+      const y = new Date(item.createdAt).getFullYear();
+      if (!isNaN(y) && y > 2000) years.add(y);
+    });
+    if (!years.size) years.add(new Date().getFullYear());
+    return [...years].sort((a, b) => b - a);
+  }, [rawOrgCourses]);
+
+  const enrollmentChart = useMemo(() => {
+    if (chartMonth === -1) {
+      const monthly = Array.from({ length: 12 }, (_, i) => ({ label: MONTHS[i], value: 0 }));
+      rawOrgCourses.forEach(item => {
+        const d = new Date(item.createdAt);
+        if (!isNaN(d) && d.getFullYear() === chartYear) monthly[d.getMonth()].value++;
+      });
+      const hasData = monthly.some(m => m.value > 0);
+      return hasData ? monthly.filter(m => m.value > 0) : monthly.slice(0, 6);
+    }
+    const daysInMonth = new Date(chartYear, chartMonth + 1, 0).getDate();
+    const daily = Array.from({ length: daysInMonth }, (_, i) => ({ label: String(i + 1), value: 0 }));
+    rawOrgCourses.forEach(item => {
+      const d = new Date(item.createdAt);
+      if (!isNaN(d) && d.getFullYear() === chartYear && d.getMonth() === chartMonth) {
+        daily[d.getDate() - 1].value++;
+      }
+    });
+    return daily;
+  }, [rawOrgCourses, chartYear, chartMonth]);
+
+  const sysTotal = (counts.users || 0) + (counts.orgAdmins || 0) + (counts.learners || 0);
+
   return (
     <SuperAdminShell activeSection="dashboard">
+      <div className={s.dashWrap}>
 
-      {/* ── Welcome banner ── */}
-      <div className={s.banner}>
-        <div>
-          <h1 className={s.bannerTitle}>{getGreeting()}, {name} 👋</h1>
-          <p className={s.bannerDate}>{formatDate()}</p>
+        {/* ── Welcome Row ── */}
+        <div className={s.welcomeRow}>
+          <div>
+            <h1 className={s.welcomeTitle}>Welcome back, {adminName}! 👋</h1>
+            <p className={s.welcomeSub}>Here&rsquo;s what&rsquo;s happening with your LMS today.</p>
+          </div>
+          {/* <button className={s.createBtn} onClick={() => router.push('/superadmin/course-builder')}>
+            + Create New &nbsp;▾
+          </button> */}
         </div>
-        <div className={s.bannerBadge}>Super Admin Panel</div>
-      </div>
 
-      {/* ── Stat cards grid ── */}
-      <div className={s.dataGrid}>
-        {DATA_BOXES.map((box, idx) => {
-          const rowColor = ROW_ACCENTS[Math.floor(idx / 4)] ?? ROW_ACCENTS[ROW_ACCENTS.length - 1];
-          return (
-            <button
-              key={box.key}
-              className={s.dataBox}
-              style={{ '--accent': rowColor }}
-              onClick={() => router.push(box.path)}
-            >
-              <div className={s.dataBoxTop}>
-                <span className={s.dataBoxIcon}>{box.icon}</span>
-                <span className={s.dataBoxArrow}>
-                  <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
-                </span>
+        {/* ── KPI Cards ── */}
+        <div className={s.kpiRow}>
+          <KpiCard icon={<StudentsIcon />} iconBg="#ede9fe" iconColor="#7c3aed" label="Total Students"      value={counts.employees}  loading={loading}     trend={8.5} />
+          <KpiCard icon={<CoursesIcon />}  iconBg="#dbeafe" iconColor="#2563eb" label="Total Courses"       value={counts.courses}    loading={loading}     trend={4.3} />
+          <KpiCard icon={<EnrollIcon />}   iconBg="#d1fae5" iconColor="#059669" label="Total Enrollments"   value={dashData.totalEnrollments} loading={dashLoading} trend={12.7} />
+          <KpiCard icon={<RevenueIcon />}  iconBg="#fef3c7" iconColor="#d97706" label="Total Revenue"       value={fmtRevenue(dashData.revenue)} loading={dashLoading} trend={15.3} />
+          <KpiCard icon={<OrgsIcon />}     iconBg="#fee2e2" iconColor="#dc2626" label="Total Organizations" value={counts.orgs}       loading={loading}     trend={6.1} />
+        </div>
+
+        {/* ── Mid Row: Chart + (Top Courses / Top Orgs) ── */}
+        <div className={s.midRow}>
+
+          {/* Enrollments Overview */}
+          <div className={s.card}>
+            <div className={s.cardHead}>
+              <span className={s.cardTitle}>Enrollments Overview</span>
+              <div className={s.chartFilters}>
+                <select className={s.filterSel} value={chartYear} onChange={e => setChartYear(Number(e.target.value))}>
+                  {availYears.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+                <select className={s.filterSel} value={chartMonth} onChange={e => setChartMonth(Number(e.target.value))}>
+                  <option value={-1}>All Months</option>
+                  {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                </select>
               </div>
-              <div className={s.cardBody}>
-                <div className={s.cardLeft}>
-                  <div className={s.dataBoxCount}>
-                    {loading ? <span className={s.skeleton} /> : fmtCount(counts[box.key])}
+            </div>
+            {dashLoading
+              ? <div className={s.chartSkel}><span className={s.skel} style={{ width: '100%', height: 200, display: 'block', borderRadius: 8 }} /></div>
+              : <EnrollLineChart data={enrollmentChart} />
+            }
+          </div>
+
+          {/* Right column: Top Courses + Top Organizations */}
+          <div className={s.midRightCol}>
+
+            {/* Top Courses */}
+            <div className={s.card}>
+              <div className={s.cardHead}>
+                <span className={s.cardTitle}>Top Courses</span>
+                <span className={s.viewAllLink} onClick={() => router.push('/superadmin/course-builder')}>View all</span>
+              </div>
+              <div className={s.topListScroll}>
+                {dashLoading ? [1,2,3,4,5].map(n => (
+                  <div key={n} className={s.topItem}>
+                    <span className={s.skel} style={{ width: 36, height: 36, borderRadius: 6, display: 'inline-block', flexShrink: 0 }} />
+                    <span className={s.skel} style={{ flex: 1, height: 14, display: 'inline-block' }} />
                   </div>
-                  <div className={s.dataBoxLabel}>{box.label}</div>
-                  <div className={s.cardSubtitle}>Total {box.label.toLowerCase()}</div>
-                </div>
-                <div className={s.cardChart}>
-                  <MiniBarChart accent={rowColor} />
-                </div>
+                )) : dashData.topCourses.length === 0
+                  ? <div className={s.emptyMsg}>No course assignments yet</div>
+                  : dashData.topCourses.map((c, i) => {
+                      const maxE = Math.max(...dashData.topCourses.map(x => x.enrollments), 1);
+                      return (
+                        <div key={c.id || i} className={s.topItem}>
+                          <div className={s.topThumb} style={{ background: COURSE_COLORS[i % COURSE_COLORS.length] }}>
+                            {c.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className={s.topInfo}>
+                            <div className={s.topName}>{c.name}</div>
+                            <div className={s.topBarWrap}>
+                              <div className={s.topBar} style={{ width: `${(c.enrollments / maxE) * 100}%`, background: COURSE_COLORS[i % COURSE_COLORS.length] }} />
+                            </div>
+                          </div>
+                          <div className={s.topCount}>{c.enrollments} <span>Enrollments</span></div>
+                        </div>
+                      );
+                    })}
               </div>
-              <div className={s.cardBottom}>
-                <span className={s.cardBadge}>● This month</span>
-                <span className={s.cardTrend}>↗ View all</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+            </div>
 
+            {/* Top Organizations */}
+            <div className={s.card}>
+              <div className={s.cardHead}>
+                <span className={s.cardTitle}>Top Organizations</span>
+                <span className={s.viewAllLink} onClick={() => router.push('/superadmin/organizations')}>View all</span>
+              </div>
+              <div className={s.topListScroll}>
+                {dashLoading ? [1,2,3,4,5].map(n => (
+                  <div key={n} className={s.topItem}>
+                    <span className={s.skel} style={{ width: 36, height: 36, borderRadius: 6, display: 'inline-block', flexShrink: 0 }} />
+                    <span className={s.skel} style={{ flex: 1, height: 14, display: 'inline-block' }} />
+                  </div>
+                )) : dashData.topOrgs.length === 0
+                  ? <div className={s.emptyMsg}>No organization enrollments yet</div>
+                  : dashData.topOrgs.map((o, i) => {
+                      const maxE = Math.max(...dashData.topOrgs.map(x => x.enrollments), 1);
+                      return (
+                        <div key={o.id || i} className={s.topItem}>
+                          <div className={s.topThumb} style={{ background: COURSE_COLORS[i % COURSE_COLORS.length] }}>
+                            {o.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className={s.topInfo}>
+                            <div className={s.topName}>{o.name}</div>
+                            <div className={s.topBarWrap}>
+                              <div className={s.topBar} style={{ width: `${(o.enrollments / maxE) * 100}%`, background: COURSE_COLORS[i % COURSE_COLORS.length] }} />
+                            </div>
+                          </div>
+                          <div className={s.topCount}>{o.enrollments} <span>Enrollments</span></div>
+                        </div>
+                      );
+                    })}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* ── Bottom Row: Recent Enrollments | Recent Orders | System Overview ── */}
+        <div className={s.bottomRow}>
+
+          {/* Recent Enrollments */}
+          <div className={`${s.card} ${s.bottomCard}`}>
+            <div className={s.cardHead}>
+              <span className={s.cardTitle}>Recent Enrollments</span>
+              {/* <span className={s.viewAllLink} onClick={() => router.push('/superadmin/organizations')}>View all</span> */}
+            </div>
+            <div className={s.scrollContent}>
+              <div className={s.enrollList}>
+                {dashLoading ? [1,2,3,4,5].map(n => (
+                  <div key={n} className={s.enrollItem}>
+                    <span className={s.skel} style={{ width: 38, height: 38, borderRadius: '50%', display: 'inline-block', flexShrink: 0 }} />
+                    <span className={s.skel} style={{ flex: 1, height: 14, display: 'inline-block' }} />
+                  </div>
+                )) : dashData.recentEnrollments.length === 0
+                  ? <div className={s.emptyMsg}>No enrollments yet</div>
+                  : dashData.recentEnrollments.map((e, i) => (
+                    <div key={i} className={s.enrollItem}>
+                      <div className={s.avatar} style={{ background: avatarColor(e.name) }}>{initials(e.name)}</div>
+                      <div className={s.enrollInfo}>
+                        <div className={s.enrollName}>{e.name}</div>
+                        <div className={s.enrollCourse}>{e.course}</div>
+                      </div>
+                      <div className={s.enrollTime}>{timeAgo(e.time)}</div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Orders */}
+          <div className={`${s.card} ${s.bottomCard}`}>
+            <div className={s.cardHead}>
+              <span className={s.cardTitle}>Recent Orders</span>
+              {/* <span className={s.viewAllLink} onClick={() => router.push('/superadmin/payments/orders')}>View all</span> */}
+            </div>
+            <div className={s.scrollContent}>
+              <table className={s.orderTbl}>
+                <tbody>
+                  {dashLoading ? [1,2,3,4,5].map(n => (
+                    <tr key={n}><td colSpan={4}><span className={s.skel} style={{ width: '100%', height: 14, display: 'inline-block' }} /></td></tr>
+                  )) : dashData.recentOrders.length === 0
+                    ? <tr><td colSpan={4} className={s.emptyMsg}>No orders yet</td></tr>
+                    : dashData.recentOrders.map((o, i) => (
+                      <tr key={i} className={s.orderRow} onClick={() => router.push('/superadmin/payments/orders')}>
+                        <td className={s.orderId}>{o.orderId}</td>
+                        <td className={s.orderCompany}>{o.company}</td>
+                        <td className={s.orderAmt}>{o.amount}</td>
+                        <td><StatusBadge status={o.status} /></td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* System Overview */}
+          <div className={`${s.card} ${s.bottomCard}`}>
+            <div className={s.cardHead}>
+              <span className={s.cardTitle}>System Overview</span>
+              {/* <span className={s.viewAllLink} onClick={() => router.push('/superadmin/user')}>View Report</span> */}
+            </div>
+            <div className={s.scrollContent}>
+              <div className={s.sysRow}>
+                {loading
+                  ? <span className={s.skel} style={{ width: 172, height: 172, borderRadius: '50%', display: 'inline-block' }} />
+                  : <DonutChart
+                      segments={[
+                        { v: counts.users     || 0, c: '#6366f1' },
+                        { v: counts.orgAdmins || 0, c: '#3b82f6' },
+                        { v: counts.learners  || 0, c: '#10b981' },
+                      ]}
+                      total={sysTotal}
+                    />
+                }
+                <div className={s.sysLegend}>
+                  {[
+                    { c: '#6366f1', label: 'Superadmin',        v: counts.users     || 0 },
+                    { c: '#3b82f6', label: 'Organization Admin', v: counts.orgAdmins || 0 },
+                    { c: '#10b981', label: 'Learner',            v: counts.learners  || 0 },
+                  ].map((item, i) => {
+                    const pct = sysTotal ? ((item.v / sysTotal) * 100).toFixed(1) : '0.0';
+                    return (
+                      <div key={i} className={s.sysLegItem}>
+                        <span className={s.sysLegDot} style={{ background: item.c }} />
+                        <div>
+                          <div className={s.sysLegLabel}>{item.label}</div>
+                          <div className={s.sysLegVal}>{item.v.toLocaleString()} <span>({pct}%)</span></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── Overview Table ── */}
+        <div className={s.card}>
+          <div className={s.cardHead}>
+            <span className={s.cardTitle}>Overview</span>
+          </div>
+          <div className={s.tblWrap}>
+            <table className={s.tbl}>
+              <thead>
+                <tr>
+                  <th>Organization</th>
+                  <th>Admin</th>
+                  <th>Courses</th>
+                  <th>Learners</th>
+                  <th>Total Order Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orgRowsLoading ? [1,2,3].map(n => (
+                  <tr key={n}>
+                    {[80,28,28,28,50].map((w, c) => (
+                      <td key={c}><span className={s.skel} style={{ width: w, height: 12 }} /></td>
+                    ))}
+                  </tr>
+                )) : orgRows.length === 0
+                  ? <tr><td colSpan={5} style={{ textAlign: 'center', color: '#9ca3af', padding: '20px 0' }}>No organizations found</td></tr>
+                  : orgRows.map((org, i) => (
+                    <tr key={org._id ?? i} style={{ cursor: 'pointer' }} onClick={() => router.push('/superadmin/organizations')}>
+                      <td style={{ fontWeight: 500, color: '#111827' }}>{org.org_name ?? '—'}</td>
+                      <td className={s.modCount}>{org._adminCount ?? 0}</td>
+                      <td className={s.modCount}>{org._courseCount ?? 0}</td>
+                      <td className={s.modCount}>{org._learnerCount ?? 0}</td>
+                      <td className={s.modCount}>{fmtAmt(org._orderAmount ?? 0)}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
     </SuperAdminShell>
   );
 }

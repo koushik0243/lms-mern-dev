@@ -305,7 +305,49 @@
   transition: background 0.2s;
 }
 
-.btnSubmit:hover { background: #0a6b6b; }
+.btnSubmit:hover:not(:disabled) { background: #0a6b6b; }
+.btnSubmit:disabled { opacity: 0.65; cursor: not-allowed; }
+
+/* ─── Toast notification ──────────────────────────────────────── */
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  animation: toastIn 0.25s ease;
+  max-width: 360px;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.toastSuccess {
+  background: #e6f4f0;
+  color: #0b5c5c;
+  border: 1px solid #b2ddd4;
+}
+
+.toastError {
+  background: #fff1f1;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+.toastIcon {
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
 
 .successBanner {
   background: #e6f4f0;
@@ -432,4 +474,651 @@
   background: #ffeaea;
   color: #dc2626;
   border: 1px solid #fca5a5;
+}
+
+.statusClosed {
+  background: #e6f4f0;
+  color: #0b7b7b;
+  border: 1px solid #b2ddd4;
+}
+
+.statusNotPossible {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.statusDeleted {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border: 1px solid #e5e7eb;
+}
+
+/* ─── List page header ────────────────────────────────────────── */
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.listTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.countChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  background: #e8f5f5;
+  color: #0b7b7b;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.listHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnNewTicket {
+  background: #0b7b7b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btnNewTicket:hover { background: #0a6b6b; }
+
+/* ─── Filter bar ──────────────────────────────────────────────── */
+.filterBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filterSearch {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+}
+
+.filterSearchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8a9ba8;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.filterInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px 0 32px;
+  border: 1px solid #d1dce5;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1a2b2b;
+  background: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.filterInput:focus { border-color: #0b7b7b; }
+.filterInput::placeholder { color: #a0adb5; }
+
+.filterSelectWrap {
+  position: relative;
+  min-width: 150px;
+}
+
+.filterSelect {
+  width: 100%;
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: 1px solid #d1dce5;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1a2b2b;
+  background: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.filterSelect:focus { border-color: #0b7b7b; }
+
+.filterChevron {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8a9ba8;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+.filterChevron svg { width: 14px; height: 14px; }
+
+.btnDeleteMulti {
+  background: #fff1f1;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btnDeleteMulti:hover { background: #ffe4e4; }
+
+/* ─── List card ───────────────────────────────────────────────── */
+.listCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  overflow: hidden;
+}
+
+.selectAllRow {
+  padding: 10px 16px;
+  border-bottom: 1px solid #f0f4f4;
+  background: #fafbfc;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #6b8080;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid #1a2b2b;
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.checkbox:checked {
+  background: #0b7b7b;
+  border-color: #0b7b7b;
+}
+
+.checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.checkbox:indeterminate {
+  background: #0b7b7b;
+  border-color: #0b7b7b;
+}
+
+.checkbox:indeterminate::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 5px;
+  width: 7px;
+  height: 2px;
+  background: #fff;
+  border-radius: 1px;
+}
+
+/* ─── Ticket row ──────────────────────────────────────────────── */
+.ticketRow {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid #f0f4f4;
+  transition: background 0.12s;
+}
+
+.ticketRow:last-child { border-bottom: none; }
+
+.ticketRow:hover { background: #fafcfc; }
+
+.ticketRowChecked { background: #f0f9f9; }
+
+.ticketChkCell {
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 16px;
+  flex-shrink: 0;
+}
+
+.ticketRowBody {
+  flex: 1;
+  padding: 14px 12px 14px 0;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.btnRowDelete {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border: none;
+  background: #dc2626;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: auto 12px auto 0;
+  padding: 0;
+}
+
+.btnRowDelete:hover { background: #b91c1c; }
+.btnRowDelete svg { width: 13px; height: 13px; }
+
+/* ─── Empty / loading state ───────────────────────────────────── */
+.emptyState {
+  padding: 48px 24px;
+  text-align: center;
+  color: #9aadad;
+  font-size: 13.5px;
+}
+
+.emptyLink {
+  background: none;
+  border: none;
+  color: #0b7b7b;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 13.5px;
+}
+
+/* ─── Table footer + pagination (superadmin style) ───────────── */
+.tableFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnBulkDelete {
+  background: #fff1f1;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btnBulkDelete:hover { background: #ffe4e4; }
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pageBtn {
+  min-width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  transition: background 0.12s;
+}
+
+.pageBtn:hover:not(:disabled) { background: #f3f4f6; }
+.pageBtn:disabled { opacity: 0.4; cursor: default; }
+
+.pageBtnActive {
+  background: #0b7b7b;
+  color: #fff;
+  border-color: #0b7b7b;
+}
+.pageBtnActive:hover { background: #0b7b7b; }
+
+/* ─── Delete confirmation modal ───────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalBox {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+  animation: toastIn 0.2s ease;
+}
+
+.modalTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0 0 10px;
+}
+
+.modalText {
+  font-size: 13.5px;
+  color: #4a6060;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btnCancelModal {
+  padding: 9px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #4a6060;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btnCancelModal:hover { background: #f4f6f8; }
+.btnCancelModal:disabled { opacity: 0.5; cursor: default; }
+
+.btnConfirmDelete {
+  padding: 9px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btnConfirmDelete:hover { background: #b91c1c; }
+.btnConfirmDelete:disabled { opacity: 0.5; cursor: default; }
+
+/* ─── Sub-page header (add / view) ───────────────────────────── */
+.subPageHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.subPageTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0;
+  flex: 1;
+}
+
+.btnBack {
+  background: none;
+  border: 1px solid #e8edf0;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: #4a6060;
+  cursor: pointer;
+  font-weight: 500;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btnBack:hover { border-color: #0b7b7b; color: #0b7b7b; }
+
+.btnDeleteOutline {
+  padding: 7px 16px;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  background: #fff1f1;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btnDeleteOutline:hover { background: #ffe4e4; }
+
+/* ─── Add form card ───────────────────────────────────────────── */
+.formCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 28px 28px 24px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+.formFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btnCancel {
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #4a6060;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btnCancel:hover { background: #f4f6f8; }
+
+/* ─── View detail card ────────────────────────────────────────── */
+.viewCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 24px;
+}
+
+.viewCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.viewSubject {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin-bottom: 20px;
+}
+
+.viewMeta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 24px;
+  padding: 18px;
+  background: #f9fbfb;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.viewMetaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.viewMetaLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9aadad;
+}
+
+.viewMetaVal {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #1a2b2b;
+}
+
+.viewSection {
+  border-top: 1px solid #f0f4f4;
+  padding-top: 18px;
+}
+
+.viewSectionLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9aadad;
+  margin-bottom: 8px;
+}
+
+.viewSectionText {
+  font-size: 13.5px;
+  color: #3a5050;
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ─── Response history / logs ─────────────────────────────────── */
+.logsCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8edf0;
+  padding: 22px 24px;
+  margin-top: 16px;
+}
+
+.logsTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1a2b2b;
+  margin: 0 0 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.logsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.logEntry {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f4f4;
+}
+.logEntry:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.logEntry:first-child {
+  padding-top: 0;
+}
+
+.logEntryHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.logDate {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6b8080;
+  white-space: nowrap;
+}
+
+.logAdmin {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a2b2b;
+}
+
+.logComment {
+  font-size: 13.5px;
+  color: #3a5050;
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-wrap;
+  padding-left: 2px;
 }

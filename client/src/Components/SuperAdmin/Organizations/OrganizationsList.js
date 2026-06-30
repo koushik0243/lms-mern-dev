@@ -79,6 +79,8 @@ export default function OrganizationsList() {
   const [selected, setSelected] = useState([]);
   const [confirm, setConfirm]   = useState({ show: false, id: null });
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey]   = useState('');
+  const [sortDir, setSortDir]   = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
@@ -130,6 +132,27 @@ export default function OrganizationsList() {
   const from = total === 0 ? 0 : (page - 1) * LIMIT + 1;
   const to   = Math.min(page * LIMIT, total);
 
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  const sorted = sortKey
+    ? [...orgs].sort((a, b) => {
+        const isDate = ['createdAt', 'updatedAt', 'purchase_date', 'payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : orgs;
+
   return (
     <SuperAdminShell activeSection="organizations">
       <ConfirmModal
@@ -165,7 +188,7 @@ export default function OrganizationsList() {
           <input
             className={s.searchInput}
             type="text"
-            placeholder="Search by name, email, phone, or plan..."
+            placeholder="Search by name, email, or phone…"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -178,21 +201,21 @@ export default function OrganizationsList() {
                 <th className={s.checkTh}>
                   <input type="checkbox" checked={allSelected} onChange={toggleAll} />
                 </th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('org_name')}>Name{sortArrow('org_name')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('org_email')}>Email{sortArrow('org_email')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('org_phone')}>Phone{sortArrow('org_phone')}</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr className={s.emptyRow}><td colSpan={7}>Loading…</td></tr>
-              ) : orgs.length === 0 ? (
+              ) : sorted.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={7}>No organizations found.</td></tr>
-              ) : orgs.map(org => (
-                <tr key={org._id}>
+              ) : sorted.map(org => (
+                <tr key={org._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(org._id)}>
                   <td className={s.checkTd}>
                     <input
                       type="checkbox"
@@ -216,7 +239,7 @@ export default function OrganizationsList() {
                   </td>
                   <td>{fmtDate(org.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button className={s.btnEdit} title="Edit"
                         onClick={() => router.push(`/superadmin/organizations/${org._id}/edit`)}
                       >

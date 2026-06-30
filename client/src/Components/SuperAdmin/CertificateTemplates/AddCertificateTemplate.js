@@ -301,7 +301,7 @@ export default function AddCertificateTemplate() {
         <p className={s.pageSubtitle}>Create a new certificate template</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.card}>
           <div className={s.cardHeader}>{CertIcon} Template Information</div>
           <div className={s.cardBody}>
@@ -314,6 +314,7 @@ export default function AddCertificateTemplate() {
                   placeholder="Enter certificate template title"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
+                  autoComplete="off"
                 />
                 {errors.title && <span className={s.errorMsg}>{errors.title}</span>}
               </div>

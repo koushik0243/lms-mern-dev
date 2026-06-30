@@ -108,7 +108,7 @@ export default function AddIndustryType() {
         <p className={s.pageSubtitle}>Create a new industry type or sub-type</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.card}>
           <div className={s.cardHeader}>{LayersIcon} Industry Type Information</div>
           <div className={s.cardBody}>
@@ -122,6 +122,7 @@ export default function AddIndustryType() {
                   placeholder="Enter industry type name"
                   value={name}
                   onChange={e => setName(e.target.value)}
+                  autoComplete="off"
                 />
                 {errors.name && <span className={s.errorMsg}>{errors.name}</span>}
               </div>

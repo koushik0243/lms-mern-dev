@@ -72,6 +72,8 @@ export default function CourseBuilderList() {
   const [totalPages, setTotalPages] = useState(1);
   const [selected, setSelected]     = useState([]);
   const [confirm, setConfirm]       = useState({ show: false, id: null });
+  const [sortKey, setSortKey]       = useState('');
+  const [sortDir, setSortDir]       = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 350);
@@ -90,9 +92,7 @@ export default function CourseBuilderList() {
           const q = debounced.toLowerCase();
           data = data.filter(r =>
             (r.title ?? '').toLowerCase().includes(q) ||
-            (r.desc ?? '').toLowerCase().includes(q) ||
-            (r.catId?.title ?? '').toLowerCase().includes(q) ||
-            (r.level ?? '').toLowerCase().includes(q)
+            (r.catId?.title ?? '').toLowerCase().includes(q)
           );
         }
         setRows(data);
@@ -104,6 +104,15 @@ export default function CourseBuilderList() {
   }, [page, debounced]);
 
   useEffect(() => { fetchRows(); }, [fetchRows]);
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
 
   function handleDelete(id) { setConfirm({ show: true, id }); }
   function doDelete() {
@@ -123,6 +132,30 @@ export default function CourseBuilderList() {
 
   const from = total === 0 ? 0 : (page - 1) * LIMIT + 1;
   const to   = Math.min(page * LIMIT, total);
+
+  const sorted = sortKey
+    ? [...rows].sort((a, b) => {
+        if (sortKey === 'catTitle') {
+          const av = (a.catId?.title ?? '').toLowerCase();
+          const bv = (b.catId?.title ?? '').toLowerCase();
+          if (av < bv) return sortDir === 'asc' ? -1 : 1;
+          if (av > bv) return sortDir === 'asc' ? 1 : -1;
+          return 0;
+        }
+        if (sortKey === 'duration') {
+          const av = (a.duration_hr || 0) * 60 + (a.duration_min || 0);
+          const bv = (b.duration_hr || 0) * 60 + (b.duration_min || 0);
+          return sortDir === 'asc' ? av - bv : bv - av;
+        }
+        const isDate = ['createdAt', 'updatedAt', 'purchase_date', 'payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : rows;
 
   return (
     <SuperAdminShell activeSection="course-builder">
@@ -151,7 +184,7 @@ export default function CourseBuilderList() {
           <input
             className={s.searchInput}
             type="text"
-            placeholder="Search by title, description, category, level..."
+            placeholder="Search by title or category…"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -165,15 +198,15 @@ export default function CourseBuilderList() {
                   <input type="checkbox" checked={allSelected} onChange={toggleAll} />
                 </th>
                 <th className={s.numCol}>#</th>
-                <th>Title</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('title')}>Title{sortArrow('title')}</th>
                 <th>Slug</th>
-                <th>Category</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('catTitle')}>Category{sortArrow('catTitle')}</th>
                 <th>Sub-Category</th>
-                <th>Duration</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('duration')}>Duration{sortArrow('duration')}</th>
                 <th>Chapters</th>
                 <th>Created By</th>
-                <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('status')}>Status{sortArrow('status')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -182,7 +215,7 @@ export default function CourseBuilderList() {
                 <tr className={s.emptyRow}><td colSpan={12}>Loading…</td></tr>
               ) : rows.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={12}>No courses found.</td></tr>
-              ) : rows.map((row, idx) => (
+              ) : sorted.map((row, idx) => (
                 <tr key={row._id}>
                   <td className={s.checkTd}>
                     <input

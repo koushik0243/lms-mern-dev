@@ -31,6 +31,23 @@
   flex-shrink: 0;
 }
 .btnAdd:hover { background: #085f5f; }
+.btnSeed {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  color: #0b7b7b;
+  border: 1.5px solid #0b7b7b;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btnSeed:hover:not(:disabled) { background: #f0fdf9; }
+.btnSeed:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ─── Card ─────────────────────────────────────────────────────── */
 .card {

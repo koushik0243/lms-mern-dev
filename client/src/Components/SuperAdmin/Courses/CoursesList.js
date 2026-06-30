@@ -73,6 +73,8 @@ export default function CoursesList() {
   const [selected, setSelected]     = useState([]);
   const [confirm, setConfirm]       = useState({ show: false, id: null });
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey]       = useState('');
+  const [sortDir, setSortDir]       = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(search), 350);
@@ -91,9 +93,7 @@ export default function CoursesList() {
           const q = debounced.toLowerCase();
           data = data.filter(r =>
             (r.title ?? '').toLowerCase().includes(q) ||
-            (r.desc ?? '').toLowerCase().includes(q) ||
-            (r.catId?.title ?? '').toLowerCase().includes(q) ||
-            (r.level ?? '').toLowerCase().includes(q)
+            (r.catId?.title ?? '').toLowerCase().includes(q)
           );
         }
         setRows(data);
@@ -105,6 +105,15 @@ export default function CoursesList() {
   }, [page, debounced]);
 
   useEffect(() => { fetchRows(); }, [fetchRows]);
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
 
   function handleDelete(id) { setConfirm({ show: true, id }); }
   function doDelete() {
@@ -134,6 +143,18 @@ export default function CoursesList() {
 
   const from = total === 0 ? 0 : (page - 1) * LIMIT + 1;
   const to   = Math.min(page * LIMIT, total);
+
+  const sorted = sortKey
+    ? [...rows].sort((a, b) => {
+        const isDate = ['createdAt', 'updatedAt', 'purchase_date', 'payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : rows;
 
   return (
     <SuperAdminShell activeSection="courses">
@@ -170,7 +191,7 @@ export default function CoursesList() {
           <input
             className={s.searchInput}
             type="text"
-            placeholder="Search by title, description, category, level..."
+            placeholder="Search by title or category…"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -184,7 +205,7 @@ export default function CoursesList() {
                   <input type="checkbox" checked={allSelected} onChange={toggleAll} />
                 </th>
                 <th className={s.numCol}>#</th>
-                <th>Title</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('title')}>Title{sortArrow('title')}</th>
                 <th>Slug</th>
                 <th>Category</th>
                 <th>Sub-Category</th>
@@ -192,7 +213,7 @@ export default function CoursesList() {
                 <th>Chapters</th>
                 <th>Created By</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -201,8 +222,8 @@ export default function CoursesList() {
                 <tr className={s.emptyRow}><td colSpan={12}>Loading…</td></tr>
               ) : rows.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={12}>No courses found.</td></tr>
-              ) : rows.map((row, idx) => (
-                <tr key={row._id}>
+              ) : sorted.map((row, idx) => (
+                <tr key={row._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(row._id)}>
                   <td className={s.checkTd}>
                     <input
                       type="checkbox"
@@ -234,7 +255,7 @@ export default function CoursesList() {
                   <td><StatusLabel status={row.status} /></td>
                   <td>{fmtDate(row.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button className={s.btnView} title="View"
                         onClick={() => router.push(`/superadmin/courses/${row._id}`)}>
                         {Icon.eye}

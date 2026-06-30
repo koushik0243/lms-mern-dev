@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import apiServiceHandler from '../../../service/apiService';
 import SuperAdminShell from '../SuperAdminShell';
 import s from './Payments.module.css';
+import AppDatePicker from '../AppDatePicker';
 
 const BackArrow = () => (
   <svg viewBox="0 0 20 20" fill="currentColor">
@@ -87,7 +88,7 @@ export default function AddOrder() {
       <h1 className={s.pageTitle}>Add Order</h1>
       <p className={s.pageSubtitle}>Create a new credit purchase order</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.formCard}>
           <div className={s.formGrid}>
 
@@ -119,17 +120,19 @@ export default function AddOrder() {
                 value={form.credit_amount === '' || isNaN(form.credit_amount) ? '' : form.credit_amount}
                 disabled
                 style={{ background: '#f3f4f6', color: '#6b7280', cursor: 'not-allowed' }}
+                autoComplete="off"
               />
               {errors.credit_amount && <p className={s.errorMsg}>{errors.credit_amount}</p>}
             </div>
 
             <div className={s.formGroup}>
               <label>Purchase Date</label>
-              <input
+              <AppDatePicker
                 className={s.input}
-                type="date"
                 value={form.purchase_date}
-                onChange={e => setField('purchase_date', e.target.value)}
+                onChange={val => setField('purchase_date', val)}
+                placeholder="Select purchase date"
+                maxDate={new Date()}
               />
             </div>
 
@@ -141,6 +144,7 @@ export default function AddOrder() {
                 placeholder="e.g. manual, razorpay, stripe"
                 value={form.payment_gateway}
                 onChange={e => setField('payment_gateway', e.target.value)}
+                autoComplete="off"
               />
             </div>
 

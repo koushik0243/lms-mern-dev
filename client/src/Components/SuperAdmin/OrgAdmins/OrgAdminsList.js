@@ -48,6 +48,8 @@ export default function OrgAdminsList() {
   const [confirm, setConfirm]       = useState({ show: false, id: null });
   const [selected, setSelected]     = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey]       = useState('');
+  const [sortDir, setSortDir]       = useState('asc');
 
   useEffect(() => {
     if (!orgId) return;
@@ -86,6 +88,27 @@ export default function OrgAdminsList() {
       )
     : admins;
 
+  const sorted = sortKey
+    ? [...filtered].sort((a, b) => {
+        const isDate = ['createdAt', 'updatedAt', 'purchase_date', 'payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : filtered;
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
   function doDelete() {
     const { id } = confirm;
     setConfirm({ show: false, id: null });
@@ -98,7 +121,7 @@ export default function OrgAdminsList() {
   const addUrl   = `/superadmin/organization-admins/add${orgId ? `?orgId=${orgId}` : ''}`;
   const editUrl  = (id) => `/superadmin/organization-admins/${id}/edit${orgId ? `?orgId=${orgId}` : ''}`;
 
-  const allIds = filtered.map(a => a._id);
+  const allIds = sorted.map(a => a._id);
   const allSelected = allIds.length > 0 && allIds.every(id => selected.includes(id));
   const toggleAll = () => setSelected(allSelected ? [] : allIds);
   const toggleOne = id => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -174,21 +197,21 @@ export default function OrgAdminsList() {
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('name')}>Name{sortArrow('name')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('email')}>Email{sortArrow('email')}</th>
                 <th>Role</th>
                 <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr className={s.emptyRow}><td colSpan={8}>Loading…</td></tr>
-              ) : filtered.length === 0 ? (
+              ) : sorted.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={8}>No admins found.</td></tr>
-              ) : filtered.map((admin, idx) => (
-                <tr key={admin._id}>
+              ) : sorted.map((admin, idx) => (
+                <tr key={admin._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(admin._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(admin._id)} onChange={() => toggleOne(admin._id)} /></td>
                   <td>{(page - 1) * LIMIT + idx + 1}</td>
                   <td>{admin.name || '—'}</td>
@@ -201,7 +224,7 @@ export default function OrgAdminsList() {
                   </td>
                   <td>{fmtDate(admin.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button
                         className={s.btnEdit}
                         title="Edit"

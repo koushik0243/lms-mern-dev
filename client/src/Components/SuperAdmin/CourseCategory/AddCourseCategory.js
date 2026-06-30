@@ -62,7 +62,7 @@ export default function AddCourseCategory() {
         <p className={s.pageSubtitle}>Create a new course category</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.card}>
           <div className={s.cardHeader}>{LayersIcon} Category Information</div>
           <div className={s.cardBody}>
@@ -75,6 +75,7 @@ export default function AddCourseCategory() {
                   placeholder="Enter category name"
                   value={title}
                   onChange={e => setTitle(e.target.value)}
+                  autoComplete="off"
                 />
                 {errors.title && <span className={s.errorMsg}>{errors.title}</span>}
               </div>

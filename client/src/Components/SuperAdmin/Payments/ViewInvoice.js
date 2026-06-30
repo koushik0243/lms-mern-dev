@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import apiServiceHandler from '../../../service/apiService';
 import SuperAdminShell from '../SuperAdminShell';
+import { generateInvoicePDF } from '../../../lib/generateInvoicePDF';
 import s from './Payments.module.css';
 
 const BackArrow = () => (
@@ -57,10 +58,10 @@ function Row({ label, value }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PDF Generation
+// Legacy copy — superseded by src/lib/generateInvoicePDF.js (kept for reference)
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function generateInvoicePDF(invoice) {
+async function _generateInvoicePDFLegacy(invoice) {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 

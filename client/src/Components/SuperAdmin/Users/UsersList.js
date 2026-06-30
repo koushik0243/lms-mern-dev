@@ -51,6 +51,8 @@ export default function UsersList() {
   const [confirm, setConfirm]   = useState({ show: false, id: null });
   const [selected, setSelected] = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey]   = useState('');
+  const [sortDir, setSortDir]   = useState('asc');
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350);
@@ -96,6 +98,34 @@ export default function UsersList() {
       .then(() => { toast.success(`${ids.length} user${ids.length !== 1 ? 's' : ''} deleted.`); fetchUsers(); })
       .catch(() => toast.error('Some deletes failed'));
   }
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  const sorted = sortKey
+    ? [...users].sort((a, b) => {
+        if (sortKey === 'user_role') {
+          const av = (a.user_role?.display_name || a.user_role?.name || '').toLowerCase();
+          const bv = (b.user_role?.display_name || b.user_role?.name || '').toLowerCase();
+          if (av < bv) return sortDir === 'asc' ? -1 : 1;
+          if (av > bv) return sortDir === 'asc' ? 1 : -1;
+          return 0;
+        }
+        const isDate = ['createdAt', 'updatedAt', 'purchase_date', 'payment_date'].includes(sortKey);
+        let av = a[sortKey] ?? ''; let bv = b[sortKey] ?? '';
+        if (isDate) { av = new Date(av).getTime() || 0; bv = new Date(bv).getTime() || 0; }
+        else { av = String(av).toLowerCase(); bv = String(bv).toLowerCase(); }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : users;
 
   const from = total === 0 ? 0 : (page - 1) * LIMIT + 1;
   const to   = Math.min(page * LIMIT, total);
@@ -149,11 +179,11 @@ export default function UsersList() {
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Created At</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('name')}>Name{sortArrow('name')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('email')}>Email{sortArrow('email')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('user_role')}>Role{sortArrow('user_role')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('status')}>Status{sortArrow('status')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('createdAt')}>Created At{sortArrow('createdAt')}</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -162,8 +192,8 @@ export default function UsersList() {
                 <tr className={s.emptyRow}><td colSpan={8}>Loading…</td></tr>
               ) : users.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={8}>No users found.</td></tr>
-              ) : users.map((u, idx) => (
-                <tr key={u._id}>
+              ) : sorted.map((u, idx) => (
+                <tr key={u._id} style={{ cursor: 'pointer' }} onClick={() => toggleOne(u._id)}>
                   <td className={s.checkTd}><input type="checkbox" checked={selected.includes(u._id)} onChange={() => toggleOne(u._id)} /></td>
                   <td>{(page - 1) * LIMIT + idx + 1}</td>
                   <td>{u.name || '—'}</td>
@@ -176,7 +206,7 @@ export default function UsersList() {
                   </td>
                   <td>{fmtDate(u.createdAt)}</td>
                   <td>
-                    <div className={s.actions}>
+                    <div className={s.actions} onClick={e => e.stopPropagation()}>
                       <button
                         className={s.btnView}
                         title="View"

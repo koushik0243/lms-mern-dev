@@ -39,6 +39,7 @@ import rolePermissionRouter from './role_permissions/role_permission.controller.
 import userRouter from './users/user.controller.js';
 import orderRouter from './orders/order.controller.js';
 import invoiceRouter from './invoices/invoice.controller.js';
+import supportTicketRouter from './support_tickets/support_ticket.controller.js';
 
 const app = express();
 app.use(express.json());
@@ -94,6 +95,7 @@ app.use('/permission', protect, permissionRouter);
 app.use('/role-permission', protect, rolePermissionRouter);
 app.use('/order', protect, orderRouter);
 app.use('/invoice', protect, invoiceRouter);
+app.use('/support-ticket', protect, supportTicketRouter);
 app.use('/user', userRouter);
 
 app.use((error, req, res, next) => {

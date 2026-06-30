@@ -87,7 +87,7 @@ export default function AddCourseSubCategory() {
         <p className={s.pageSubtitle}>Create one or more course sub-categories</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.card}>
           <div className={s.cardHeader}>{LayersIcon} Select Category</div>
           <div className={s.cardBody}>
@@ -122,6 +122,7 @@ export default function AddCourseSubCategory() {
                     placeholder="Enter sub-category name"
                     value={entry.name}
                     onChange={e => setEntry(idx, 'name', e.target.value)}
+                    autoComplete="off"
                   />
                   {errors[`name_${idx}`] && <span className={s.errorMsg}>{errors[`name_${idx}`]}</span>}
                 </div>

@@ -20,6 +20,8 @@ export default function AddEmployee() {
   const [form, setForm]         = useState(EMPTY);
   const [errors, setErrors]     = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [pwReadOnly, setPwReadOnly] = useState(true);
+  const [confirmPwReadOnly, setConfirmPwReadOnly] = useState(true);
 
   function setField(key, val) { setForm(prev => ({ ...prev, [key]: val })); }
 
@@ -70,7 +72,7 @@ export default function AddEmployee() {
       <p className={s.pageSubtitle}>Create a new employee account</p>
 
       <div className={s.formCard}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autoComplete="off">
           <div className={s.formGrid}>
 
             <div className={s.formGroup}>
@@ -81,6 +83,7 @@ export default function AddEmployee() {
                 placeholder="Full name"
                 value={form.name}
                 onChange={e => setField('name', e.target.value)}
+                autoComplete="off"
               />
               {errors.name && <p className={s.errorMsg}>{errors.name}</p>}
             </div>
@@ -93,6 +96,7 @@ export default function AddEmployee() {
                 placeholder="user@example.com"
                 value={form.email}
                 onChange={e => setField('email', e.target.value)}
+                autoComplete="off"
               />
               {errors.email && <p className={s.errorMsg}>{errors.email}</p>}
             </div>
@@ -106,6 +110,8 @@ export default function AddEmployee() {
                 value={form.password}
                 onChange={e => setField('password', e.target.value)}
                 autoComplete="new-password"
+                readOnly={pwReadOnly}
+                onFocus={() => setPwReadOnly(false)}
               />
               {errors.password && <p className={s.errorMsg}>{errors.password}</p>}
             </div>
@@ -119,6 +125,8 @@ export default function AddEmployee() {
                 value={form.confirmPassword}
                 onChange={e => setField('confirmPassword', e.target.value)}
                 autoComplete="new-password"
+                readOnly={confirmPwReadOnly}
+                onFocus={() => setConfirmPwReadOnly(false)}
               />
               {errors.confirmPassword && <p className={s.errorMsg}>{errors.confirmPassword}</p>}
             </div>

@@ -1,280 +1,543 @@
-﻿'use client';
+'use client';
 
-import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
-import { selectUser, clearAuth } from '../../../redux/slices/authSlice';
+import { useState, useEffect, useCallback } from 'react';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../../../redux/slices/authSlice';
 import s from './Support.module.css';
+import apiServiceHandler from '../../../service/apiService';
 
-// ── Icons ────────────────────────────────────────────────────────
-const Icon = {
-  dashboard:    <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 1116 0A8 8 0 012 10zm8-3a1 1 0 100 2 1 1 0 000-2zm-3 8a3 3 0 016 0H7z" /></svg>,
-  store:        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 000 2h14a1 1 0 000-2H3zm-1 4a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1zm1 4a1 1 0 000 2h8a1 1 0 000-2H3z" /></svg>,
-  users:        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zm8 0a3 3 0 11-6 0 3 3 0 016 0zM6.865 14c.41-1.135 1.53-2 2.635-2h1c1.105 0 2.226.865 2.635 2H6.865zM1 14a5.002 5.002 0 019-3h.001A5 5 0 0119 14v1H1v-1z" /></svg>,
-  assign:       <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" /></svg>,
-  courses:      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4 7.962 7.962 0 009 5.189V4.804z" /></svg>,
-  track:        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-4a1 1 0 011-1h2a1 1 0 011 1v13a1 1 0 01-1 1h-2a1 1 0 01-1-1V3z" /></svg>,
-  reports:      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm2 10a1 1 0 10-2 0v3a1 1 0 102 0v-3zm2-3a1 1 0 011 1v5a1 1 0 11-2 0v-5a1 1 0 011-1zm4-1a1 1 0 10-2 0v7a1 1 0 102 0V8z" clipRule="evenodd" /></svg>,
-  subscription: <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" /><path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" /></svg>,
-  credits:      <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" /><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" /></svg>,
-  support:      <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C15.802 8.249 16 9.1 16 10zm-5.165 3.913l1.58 1.58A5.98 5.98 0 0110 16a5.976 5.976 0 01-2.516-.552l1.562-1.562a4.006 4.006 0 001.789.027zm-4.677-2.796a4.002 4.002 0 01-.041-2.08l-.08.08-1.53-1.533A5.98 5.98 0 004 10c0 .954.223 1.856.619 2.657l1.54-1.54zm1.088-6.45A5.974 5.974 0 0110 4c.954 0 1.856.223 2.657.619l-1.54 1.54a4.002 4.002 0 00-2.346.033L7.246 4.668z" clipRule="evenodd" /></svg>,
-  logout:       <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" /></svg>,
-  bell:         <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 01-2-2h4a2 2 0 01-2 2z" /></svg>,
-  help:         <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" /></svg>,
-  chevronDown:  <svg viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" /></svg>,
+// ── Helpers ──────────────────────────────────────────────────────
+function getTokenUserId() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const token = localStorage.getItem('adminToken');
+    if (!token) return null;
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return payload._id || null;
+  } catch { return null; }
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch { return '—'; }
+}
+
+function formatDateTime(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return `${date}  ${time}`;
+  } catch { return '—'; }
+}
+
+function progressColor(status) {
+  return { open: '#ef4444', in_progress: '#f59e0b', resolved: '#0b7b7b', close: '#0b7b7b', not_possible: '#9ca3af', deleted: '#d1d5db' }[status] ?? '#9ca3af';
+}
+
+// ── Icons ─────────────────────────────────────────────────────────
+const TrashIcon = () => (
+  <svg viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+  </svg>
+);
+
+const ChevronDown = () => (
+  <svg viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+  </svg>
+);
+
+// ── Constants ─────────────────────────────────────────────────────
+const ISSUE_TYPES = ['Technical Issue', 'Billing', 'Course Access', 'Zoom Integration', 'Other'];
+const PRIORITIES  = ['Low', 'Normal', 'High', 'Urgent'];
+const EMPTY_FORM  = { issueType: '', subject: '', description: '', priority: 'Normal' };
+const PER_PAGE    = 50;
+
+const STATUS_CFG = {
+  open:         { label: 'Open',         cls: 'statusOpen',        progress: 12 },
+  in_progress:  { label: 'In Progress',  cls: 'statusInProgress',  progress: 48 },
+  resolved:     { label: 'Resolved',     cls: 'statusResolved',    progress: 100 },
+  close:        { label: 'Closed',       cls: 'statusClosed',      progress: 100 },
+  not_possible: { label: 'Not Possible', cls: 'statusNotPossible', progress: 60 },
+  deleted:      { label: 'Deleted',      cls: 'statusDeleted',     progress: 0 },
 };
 
-function NavItem({ icon, label, active, onClick }) {
+// ── Toast helper component ────────────────────────────────────────
+function Toast({ toast }) {
+  if (!toast) return null;
   return (
-    <button className={`${s.navItem} ${active ? s.navItemActive : ''}`} onClick={onClick}>
-      <span className={s.navIcon}>{icon}</span>
-      {label}
-    </button>
+    <div className={`${s.toast} ${toast.type === 'error' ? s.toastError : s.toastSuccess}`}>
+      <span className={s.toastIcon}>{toast.type === 'error' ? '✕' : '✓'}</span>
+      {toast.msg}
+    </div>
   );
 }
 
-const ISSUE_TYPES = ['Technical Issue', 'Billing', 'Course Access', 'Zoom Integration', 'Other'];
-const PRIORITIES  = ['Low', 'Normal', 'High', 'Urgent'];
-
-const TICKETS = [
-  {
-    id: '#TKT-042',
-    category: 'Video',
-    title: 'Not Loading In Ch.2',
-    status: 'In progress',
-    statusClass: 'statusInProgress',
-    progress: 40,
-    progressColor: '#f59e0b',
-    score: '03/06',
-    meta: 'Raised 2 Apr · Technical Issue · Response in 24hrs',
-  },
-  {
-    id: '#TKT-039',
-    category: 'Credit',
-    title: 'Not Reflecting After Payment',
-    status: 'Resolved',
-    statusClass: 'statusResolved',
-    progress: 100,
-    progressColor: '#0b7b7b',
-    score: '06/06',
-    meta: 'Raised 25 Mar · Billing · Closed 29 Mar',
-  },
-  {
-    id: '#TKT-048',
-    category: 'Zoom Link',
-    title: 'Not Sent To Learners',
-    status: 'open',
-    statusClass: 'statusOpen',
-    progress: 20,
-    progressColor: '#ef4444',
-    score: '03/06',
-    meta: 'Raised Today · Zoom Integration · Awaiting response',
-  },
-];
-
-export default function SupportPage() {
-  const user     = useSelector(selectUser);
-  const dispatch = useDispatch();
-  const router   = useRouter();
-
-  const userName = user?.name || user?.email || 'Store Owner';
-  const initials = userName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-
-  const [form, setForm] = useState({
-    issueType: '',
-    subject: '',
-    description: '',
-    priority: 'Normal',
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  function set(key) {
-    return e => setForm(f => ({ ...f, [key]: e.target.value }));
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
-    setForm({ issueType: '', subject: '', description: '', priority: 'Normal' });
-  }
-
-  function handleLogout() {
-    dispatch(clearAuth());
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('BHARAT_TOKEN');
-    }
-    router.replace('/login');
-  }
-
+// ── Delete Confirmation Modal ─────────────────────────────────────
+function DeleteModal({ count, onCancel, onConfirm, deleting }) {
   return (
-    <div className={s.shell}>
-      {/* ── Sidebar ── */}
-      <aside className={s.sidebar}>
-        <div className={s.sidebarLogo}><span className={s.logoD}>sikhø</span><span className={s.logoA}>aur</span><span className={s.logoD}>badhø</span></div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Overview</div>
-          <NavItem icon={Icon.dashboard} label="Dashboard"    onClick={() => router.push('/storeowner/dashboard')} />
-          <NavItem icon={Icon.store}     label="Store Profile" onClick={() => router.push('/storeowner/profile')} />
-        </div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Learners</div>
-          <NavItem icon={Icon.users}  label="User Management" onClick={() => router.push('/storeowner/users')} />
-          <NavItem icon={Icon.assign} label="Assign Courses"  onClick={() => router.push('/storeowner/assign-courses')} />
-        </div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Content</div>
-          <NavItem icon={Icon.courses} label="My Courses" onClick={() => router.push('/storeowner/my-courses')} />
-        </div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Analytics</div>
-          <NavItem icon={Icon.track}   label="Track & Analysis" onClick={() => router.push('/storeowner/track-analysis')} />
-          <NavItem icon={Icon.reports} label="Reports" onClick={() => router.push('/storeowner/reports')} />
-        </div>
-
-        <div className={s.sidebarSection}>
-          <div className={s.sidebarLabel}>Account</div>
-          <NavItem icon={Icon.subscription} label="Subscription" onClick={() => router.push('/storeowner/subscription')} />
-          <NavItem icon={Icon.credits}      label="Credits"      onClick={() => router.push('/storeowner/credits')} />
-          <NavItem icon={Icon.support}      label="Support" active onClick={() => router.push('/storeowner/support')} />
-        </div>
-
-        <div className={s.sidebarSpacer} />
-        <div className={s.sidebarFooter}>
-          <NavItem icon={Icon.logout} label="Log Out" onClick={handleLogout} />
-        </div>
-      </aside>
-
-      {/* ── Main ── */}
-      <div className={s.main}>
-        {/* Top bar */}
-        <header className={s.topbar}>
-          <div className={s.breadcrumb}>
-            Store Owner / <strong>Support</strong>
-          </div>
-          <div className={s.topbarActions}>
-            <button className={s.btnAddLearner} onClick={() => router.push('/storeowner/add-learner')}>
-              + Add Learner
-            </button>
-            <button className={s.iconBtn} title="Help">{Icon.help}</button>
-            <button className={s.iconBtn} title="Notifications">{Icon.bell}</button>
-            <button className={s.avatarBtn} title={userName}>{initials}</button>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div className={s.content}>
-          <div className={s.twoCol}>
-
-            {/* ── Left: Raise a Ticket ── */}
-            <div className={s.card}>
-              <h2 className={s.cardTitle}>Raise A Ticket</h2>
-
-              {submitted && (
-                <div className={s.successBanner}>✓ Ticket submitted successfully!</div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                {/* Issue Type */}
-                <div className={s.fieldGroup}>
-                  <label className={s.label}>Issue Type</label>
-                  <div className={s.selectWrap}>
-                    <select className={s.select} value={form.issueType} onChange={set('issueType')} required>
-                      <option value="" disabled>Select Industry Name…</option>
-                      {ISSUE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                    <span className={s.chevron}>{Icon.chevronDown}</span>
-                  </div>
-                </div>
-
-                {/* Subject */}
-                <div className={s.fieldGroup}>
-                  <label className={s.label}>Subject</label>
-                  <input
-                    className={s.input}
-                    placeholder="Brief description of the…"
-                    value={form.subject}
-                    onChange={set('subject')}
-                    required
-                  />
-                </div>
-
-                {/* Description */}
-                <div className={s.fieldGroup}>
-                  <label className={s.label}>Description</label>
-                  <textarea
-                    className={s.textarea}
-                    placeholder="Describe your issue in details…"
-                    value={form.description}
-                    onChange={set('description')}
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                {/* Priority */}
-                <div className={s.fieldGroup}>
-                  <label className={s.label}>Priority</label>
-                  <div className={s.selectWrap}>
-                    <select className={s.select} value={form.priority} onChange={set('priority')}>
-                      {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                    <span className={s.chevron}>{Icon.chevronDown}</span>
-                  </div>
-                </div>
-
-                <button type="submit" className={s.btnSubmit}>Assign Course</button>
-              </form>
-            </div>
-
-            {/* ── Right: Ticket list ── */}
-            <div className={s.card}>
-              <h2 className={s.cardTitle}>Video completion tracking</h2>
-
-              {/* Course selector */}
-              <div className={s.selectWrap} style={{ marginBottom: 20 }}>
-                <select className={s.select} defaultValue="">
-                  <option value="" disabled>Select Course</option>
-                </select>
-                <span className={s.chevron}>{Icon.chevronDown}</span>
-              </div>
-
-              {/* Ticket cards */}
-              <div className={s.ticketList}>
-                {TICKETS.map(ticket => (
-                  <div key={ticket.id} className={s.ticketCard}>
-                    <div className={s.ticketTopRow}>
-                      <div className={s.ticketIdGroup}>
-                        <span className={s.ticketId}>{ticket.id}</span>
-                        <span className={s.ticketDot}>·</span>
-                        <span className={s.ticketCategory}>{ticket.category}</span>
-                      </div>
-                      <span className={`${s.statusBadge} ${s[ticket.statusClass]}`}>{ticket.status}</span>
-                    </div>
-                    <div className={s.ticketTitle}>{ticket.title}</div>
-                    <div className={s.ticketProgressRow}>
-                      <div className={s.ticketTrack}>
-                        <div
-                          className={s.ticketFill}
-                          style={{ width: `${ticket.progress}%`, background: ticket.progressColor }}
-                        />
-                      </div>
-                      <span className={s.ticketScore}>{ticket.score}</span>
-                    </div>
-                    <div className={s.ticketMeta}>{ticket.meta}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
+    <div className={s.modalOverlay}>
+      <div className={s.modalBox}>
+        <h3 className={s.modalTitle}>Confirm Delete</h3>
+        <p className={s.modalText}>
+          Are you sure you want to delete {count === 1 ? 'this ticket' : `${count} tickets`}?
+          This action cannot be undone.
+        </p>
+        <div className={s.modalActions}>
+          <button className={s.btnCancelModal} onClick={onCancel} disabled={deleting}>Cancel</button>
+          <button className={s.btnConfirmDelete} onClick={onConfirm} disabled={deleting}>
+            {deleting ? 'Deleting…' : `Delete ${count > 1 ? `(${count})` : ''}`}
+          </button>
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────
+export default function SupportPage() {
+  const user = useSelector(selectUser);
+
+  const [view, setView]                     = useState('list');
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [tickets, setTickets]               = useState([]);
+  const [loading, setLoading]               = useState(true);
+  const [orgId, setOrgId]                   = useState(null);
+
+  const [form, setForm]                     = useState(EMPTY_FORM);
+  const [submitting, setSubmitting]         = useState(false);
+
+  const [checked, setChecked]               = useState(new Set());
+  const [page, setPage]                     = useState(1);
+  const [statusFilter, setStatusFilter]     = useState('');
+  const [searchQuery, setSearchQuery]       = useState('');
+
+  const [toast, setToast]                   = useState(null);
+  const [deleteModal, setDeleteModal]       = useState(null); // string[]
+  const [deleting, setDeleting]             = useState(false);
+
+  // ── Toast ───────────────────────────────────────────────────────
+  const showToast = useCallback((type, msg) => {
+    setToast({ type, msg });
+    setTimeout(() => setToast(null), 4000);
+  }, []);
+
+  // ── Load data ───────────────────────────────────────────────────
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      let oid = user?.orgId ? String(user.orgId) : null;
+      if (!oid) {
+        const uid = user?._id || getTokenUserId();
+        if (uid) {
+          const r = await apiServiceHandler('GET', `user/admin/edit/${uid}`);
+          const rec = r?.data ?? r;
+          if (rec?.orgId) oid = String(rec.orgId);
+        }
+      }
+      if (oid) setOrgId(oid);
+      const res = await apiServiceHandler('GET', oid ? `support-ticket/list?orgId=${oid}` : 'support-ticket/list').catch(() => null);
+      const data = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      setTickets(data);
+    } catch {
+      setTickets([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?._id, user?.orgId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  // ── Form ────────────────────────────────────────────────────────
+  function setField(key) {
+    return e => setForm(f => ({ ...f, [key]: e.target.value }));
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await apiServiceHandler('POST', 'support-ticket/create', {
+        orgId,
+        issue_type: form.issueType,
+        subject:    form.subject,
+        desc:       form.description,
+        priority:   form.priority,
+      });
+      showToast('success', 'Ticket raised successfully! Our team will respond shortly.');
+      setForm(EMPTY_FORM);
+      setView('list');
+      loadData();
+    } catch (err) {
+      showToast('error', err?.message || 'Failed to raise ticket. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // ── Delete ──────────────────────────────────────────────────────
+  async function confirmDelete() {
+    if (!deleteModal) return;
+    setDeleting(true);
+    try {
+      for (const id of deleteModal) {
+        await apiServiceHandler('GET', `support-ticket/delete/${id}`);
+      }
+      showToast('success', `${deleteModal.length} ticket${deleteModal.length > 1 ? 's' : ''} deleted.`);
+      setChecked(new Set());
+      setDeleteModal(null);
+      if (view === 'view') setView('list');
+      setPage(1);
+      await loadData();
+    } catch (err) {
+      showToast('error', err?.message || 'Failed to delete ticket(s).');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  // ── Filtering ────────────────────────────────────────────────────
+  const filteredTickets = tickets.filter(t => {
+    if (statusFilter && t.status !== statusFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.replace(/^#/, '').toLowerCase();
+      if (!(t.ticket_id || '').toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+
+  // Reset page when filters change
+  useEffect(() => { setPage(1); }, [statusFilter, searchQuery]);
+
+  // ── Pagination & selection ───────────────────────────────────────
+  const totalPages    = Math.max(1, Math.ceil(filteredTickets.length / PER_PAGE));
+  const pagedTickets  = filteredTickets.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const pageIds       = pagedTickets.map(t => t._id);
+  const allPageChecked = pageIds.length > 0 && pageIds.every(id => checked.has(id));
+
+  function toggleCheck(id) {
+    setChecked(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setChecked(prev => {
+      const next = new Set(prev);
+      const allOn = pageIds.every(id => next.has(id));
+      allOn ? pageIds.forEach(id => next.delete(id)) : pageIds.forEach(id => next.add(id));
+      return next;
+    });
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // ADD VIEW
+  // ════════════════════════════════════════════════════════════════
+  if (view === 'add') {
+    return (
+      <>
+        <Toast toast={toast} />
+        <div className={s.subPageHeader}>
+          <button className={s.btnBack} onClick={() => setView('list')}>← Back</button>
+          <h2 className={s.subPageTitle}>Raise A Ticket</h2>
+        </div>
+
+        <div className={s.formCard}>
+          <form onSubmit={handleSubmit}>
+            <div className={s.formGrid}>
+              <div className={s.fieldGroup}>
+                <label className={s.label}>Issue Type</label>
+                <div className={s.selectWrap}>
+                  <select className={s.select} value={form.issueType} onChange={setField('issueType')} required>
+                    <option value="" disabled>Select Issue Type…</option>
+                    {ISSUE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <span className={s.chevron}><ChevronDown /></span>
+                </div>
+              </div>
+              <div className={s.fieldGroup}>
+                <label className={s.label}>Priority</label>
+                <div className={s.selectWrap}>
+                  <select className={s.select} value={form.priority} onChange={setField('priority')}>
+                    {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  <span className={s.chevron}><ChevronDown /></span>
+                </div>
+              </div>
+            </div>
+
+            <div className={s.fieldGroup}>
+              <label className={s.label}>Subject</label>
+              <input className={s.input} placeholder="Brief description of the issue…" value={form.subject} onChange={setField('subject')} required />
+            </div>
+
+            <div className={s.fieldGroup}>
+              <label className={s.label}>Description</label>
+              <textarea className={s.textarea} placeholder="Describe your issue in detail…" value={form.description} onChange={setField('description')} rows={5} required />
+            </div>
+
+            <div className={s.formFooter}>
+              <button type="button" className={s.btnCancel} onClick={() => setView('list')}>Cancel</button>
+              <button type="submit" className={s.btnSubmit} disabled={submitting}>
+                {submitting ? 'Submitting…' : 'Raise a Ticket'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </>
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // VIEW DETAIL
+  // ════════════════════════════════════════════════════════════════
+  if (view === 'view' && selectedTicket) {
+    const t  = selectedTicket;
+    const sc = STATUS_CFG[t.status] ?? { label: t.status, cls: 'statusOpen', progress: 10 };
+    return (
+      <>
+        <Toast toast={toast} />
+        <div className={s.subPageHeader}>
+          <button className={s.btnBack} onClick={() => setView('list')}>← Back</button>
+          <h2 className={s.subPageTitle}>Ticket Details</h2>
+          <button className={s.btnDeleteOutline} onClick={() => setDeleteModal([t._id])}>Delete</button>
+        </div>
+
+        <div className={s.viewCard}>
+          <div className={s.viewCardHeader}>
+            <div className={s.ticketIdGroup}>
+              <span className={s.ticketId}>#{t.ticket_id}</span>
+              <span className={s.ticketDot}>·</span>
+              <span className={s.ticketCategory}>{t.issue_type}</span>
+            </div>
+            <span className={`${s.statusBadge} ${s[sc.cls]}`}>{sc.label}</span>
+          </div>
+
+          <div className={s.viewSubject}>{t.subject}</div>
+
+          <div className={s.viewMeta}>
+            <div className={s.viewMetaItem}><span className={s.viewMetaLabel}>Priority</span><span className={s.viewMetaVal}>{t.priority}</span></div>
+            <div className={s.viewMetaItem}><span className={s.viewMetaLabel}>Raised On</span><span className={s.viewMetaVal}>{formatDate(t.createdAt)}</span></div>
+            <div className={s.viewMetaItem}><span className={s.viewMetaLabel}>Ticket ID</span><span className={s.viewMetaVal}>#{t.ticket_id}</span></div>
+            <div className={s.viewMetaItem}><span className={s.viewMetaLabel}>Status</span><span className={`${s.statusBadge} ${s[sc.cls]}`}>{sc.label}</span></div>
+          </div>
+
+          <div className={s.viewSection}>
+            <span className={s.viewSectionLabel}>Description</span>
+            <p className={s.viewSectionText}>{t.desc}</p>
+          </div>
+
+          {t.resolve_text && (
+            <div className={s.viewSection}>
+              <span className={s.viewSectionLabel}>Resolution Notes</span>
+              <p className={s.viewSectionText}>{t.resolve_text}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Response history */}
+        {Array.isArray(t.logs) && t.logs.length > 0 && (
+          <div className={s.logsCard}>
+            <h3 className={s.logsTitle}>Response History</h3>
+            <div className={s.logsList}>
+              {[...t.logs].reverse().map((log, i) => {
+                const logSc = STATUS_CFG[log.status] ?? null;
+                return (
+                  <div key={i} className={s.logEntry}>
+                    <div className={s.logEntryHeader}>
+                      <span className={s.logDate}>{formatDateTime(log.date)}</span>
+                      <span className={s.logAdmin}>{log.adminName || 'Admin'}</span>
+                      {logSc && (
+                        <span className={`${s.statusBadge} ${s[logSc.cls]}`}>{logSc.label}</span>
+                      )}
+                    </div>
+                    {log.comment && (
+                      <p className={s.logComment}>{log.comment}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {deleteModal && (
+          <DeleteModal count={deleteModal.length} onCancel={() => setDeleteModal(null)} onConfirm={confirmDelete} deleting={deleting} />
+        )}
+      </>
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // LIST VIEW
+  // ════════════════════════════════════════════════════════════════
+  return (
+    <>
+      <Toast toast={toast} />
+
+      {/* Header */}
+      <div className={s.listHeader}>
+        <h2 className={s.listTitle}>Support Tickets
+          {!loading && (
+            <span className={s.countChip}>
+              {filteredTickets.length !== tickets.length
+                ? `${filteredTickets.length} / ${tickets.length}`
+                : tickets.length}
+            </span>
+          )}
+        </h2>
+        <div className={s.listHeaderRight}>
+          <button className={s.btnNewTicket} onClick={() => setView('add')}>+ New Ticket</button>
+        </div>
+      </div>
+
+      {/* Filter bar */}
+      <div className={s.filterBar}>
+        <div className={s.filterSearch}>
+          <span className={s.filterSearchIcon}>
+            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+            </svg>
+          </span>
+          <input
+            className={s.filterInput}
+            type="text"
+            placeholder="#TKT-001"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className={s.filterSelectWrap}>
+          <select
+            className={s.filterSelect}
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+          >
+            <option value="">All Statuses</option>
+            {Object.entries(STATUS_CFG).filter(([k]) => k !== 'deleted').map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+          <span className={s.filterChevron}><ChevronDown /></span>
+        </div>
+      </div>
+
+      {/* List Card */}
+      <div className={s.listCard}>
+        {loading ? (
+          <div className={s.emptyState}>Loading tickets…</div>
+        ) : tickets.length === 0 ? (
+          <div className={s.emptyState}>
+            No tickets yet.{' '}
+            <button className={s.emptyLink} onClick={() => setView('add')}>Raise your first ticket →</button>
+          </div>
+        ) : filteredTickets.length === 0 ? (
+          <div className={s.emptyState}>No tickets match your filters.</div>
+        ) : (
+          <>
+            {/* Select-all row */}
+            <div className={s.selectAllRow}>
+              <label className={s.checkboxLabel}>
+                <input type="checkbox" className={s.checkbox} checked={allPageChecked} onChange={toggleAll} />
+                Select all on this page
+              </label>
+            </div>
+
+            <div className={s.ticketList}>
+              {pagedTickets.map(ticket => {
+                const sc      = STATUS_CFG[ticket.status] ?? STATUS_CFG.open;
+                const isChkd  = checked.has(ticket._id);
+                return (
+                  <div key={ticket._id} className={`${s.ticketRow} ${isChkd ? s.ticketRowChecked : ''}`}>
+                    {/* Checkbox */}
+                    <div className={s.ticketChkCell}>
+                      <input
+                        type="checkbox"
+                        className={s.checkbox}
+                        checked={isChkd}
+                        onChange={() => toggleCheck(ticket._id)}
+                        onClick={e => e.stopPropagation()}
+                      />
+                    </div>
+
+                    {/* Body — clickable */}
+                    <div className={s.ticketRowBody} onClick={() => { setSelectedTicket(ticket); setView('view'); }}>
+                      <div className={s.ticketTopRow}>
+                        <div className={s.ticketIdGroup}>
+                          <span className={s.ticketId}>#{ticket.ticket_id}</span>
+                          <span className={s.ticketDot}>·</span>
+                          <span className={s.ticketCategory}>{ticket.issue_type}</span>
+                        </div>
+                        <span className={`${s.statusBadge} ${s[sc.cls]}`}>{sc.label}</span>
+                      </div>
+                      <div className={s.ticketTitle}>{ticket.subject}</div>
+                      <div className={s.ticketProgressRow}>
+                        <div className={s.ticketTrack}>
+                          <div className={s.ticketFill} style={{ width: `${sc.progress}%`, background: progressColor(ticket.status) }} />
+                        </div>
+                      </div>
+                      <div className={s.ticketMeta}>
+                        Raised {formatDate(ticket.createdAt)} · {ticket.priority} · {ticket.issue_type}
+                      </div>
+                    </div>
+
+                    {/* Delete icon */}
+                    <button
+                      className={s.btnRowDelete}
+                      onClick={e => { e.stopPropagation(); setDeleteModal([ticket._id]); }}
+                      title="Delete ticket"
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Table footer — superadmin style */}
+            <div className={s.tableFooter}>
+              <div className={s.footerLeft}>
+                {checked.size > 0 && (
+                  <button className={s.btnBulkDelete} onClick={() => setDeleteModal([...checked])}>
+                    Delete Selected ({checked.size})
+                  </button>
+                )}
+                <span>
+                  {`Showing ${(page - 1) * PER_PAGE + 1} to ${Math.min(page * PER_PAGE, filteredTickets.length)} of ${filteredTickets.length} ticket${filteredTickets.length !== 1 ? 's' : ''}`}
+                </span>
+              </div>
+              <div className={s.pagination}>
+                <button className={s.pageBtn} disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                  <button
+                    key={n}
+                    className={`${s.pageBtn} ${n === page ? s.pageBtnActive : ''}`}
+                    onClick={() => setPage(n)}
+                  >
+                    {n}
+                  </button>
+                ))}
+                <button className={s.pageBtn} disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>
+                  Next
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Delete modal */}
+      {deleteModal && (
+        <DeleteModal count={deleteModal.length} onCancel={() => setDeleteModal(null)} onConfirm={confirmDelete} deleting={deleting} />
+      )}
+    </>
   );
 }

@@ -43,6 +43,8 @@ export default function AddOrganization() {
   const [ownerEmail, setOwnerEmail]             = useState('');
   const [ownerPassword, setOwnerPassword]       = useState('');
   const [ownerConfirmPassword, setOwnerConfirmPassword] = useState('');
+  const [pwReadOnly, setPwReadOnly]             = useState(true);
+  const [confirmPwReadOnly, setConfirmPwReadOnly] = useState(true);
   const [courses, setCourses]                   = useState([]);
   const [selectedCourses, setSelectedCourses]   = useState([]);
   const [courseSearch, setCourseSearch]         = useState('');
@@ -174,7 +176,7 @@ export default function AddOrganization() {
       <h1 className={s.pageTitle}>Add Organization</h1>
       <p className={s.pageSubtitle}>Create a new organization</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         {/* ── Organization Information ── */}
         <div className={s.sectionCard}>
           <div className={s.sectionHeader}>
@@ -192,6 +194,7 @@ export default function AddOrganization() {
                     placeholder="Enter organization name"
                     value={orgName}
                     onChange={e => setOrgName(e.target.value)}
+                    autoComplete="off"
                   />
                   {errors.org_name && <span className={s.errorMsg}>{errors.org_name}</span>}
                 </div>
@@ -205,7 +208,7 @@ export default function AddOrganization() {
                     </div>
                   ) : (
                     <label className={s.imageUploadArea}>
-                      <input type="file" accept="image/*" className={s.imageFileInput} onChange={handleLogoChange} />
+                      <input type="file" accept="image/*" className={s.imageFileInput} onChange={handleLogoChange} autoComplete="off" />
                       <span className={s.imageUploadIcon}>
                         <svg viewBox="0 0 20 20" fill="currentColor" width="22" height="22">
                           <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
@@ -252,6 +255,7 @@ export default function AddOrganization() {
                   placeholder="owner@organization.com"
                   value={ownerEmail}
                   onChange={e => setOwnerEmail(e.target.value)}
+                  autoComplete="off"
                 />
                 {errors.owner_email && <span className={s.errorMsg}>{errors.owner_email}</span>}
               </div>
@@ -265,6 +269,9 @@ export default function AddOrganization() {
                   placeholder="Minimum 6 characters"
                   value={ownerPassword}
                   onChange={e => setOwnerPassword(e.target.value)}
+                  readOnly={pwReadOnly}
+                  onFocus={() => setPwReadOnly(false)}
+                  autoComplete="new-password"
                 />
                 {errors.owner_password && <span className={s.errorMsg}>{errors.owner_password}</span>}
               </div>
@@ -276,6 +283,9 @@ export default function AddOrganization() {
                   placeholder="Re-enter password"
                   value={ownerConfirmPassword}
                   onChange={e => setOwnerConfirmPassword(e.target.value)}
+                  readOnly={confirmPwReadOnly}
+                  onFocus={() => setConfirmPwReadOnly(false)}
+                  autoComplete="new-password"
                 />
                 {errors.owner_confirm && <span className={s.errorMsg}>{errors.owner_confirm}</span>}
               </div>
@@ -300,13 +310,14 @@ export default function AddOrganization() {
               placeholder="Search courses…"
               value={courseSearch}
               onChange={e => setCourseSearch(e.target.value)}
+              autoComplete="off"
             />
             {courses.length === 0 ? (
               <p className={s.coursesEmpty}>No courses available.</p>
             ) : (
               <div className={s.coursesContainer}>
                 <label className={s.courseSelectAllRow}>
-                  <input type="checkbox" checked={allVisibleSelected} onChange={toggleSelectAll} />
+                  <input type="checkbox" checked={allVisibleSelected} onChange={toggleSelectAll} autoComplete="off" />
                   <span>Select All</span>
                 </label>
                 <div className={s.coursesList} style={{ maxHeight: 200, overflowY: 'auto', overflowX: 'hidden' }}>
@@ -321,6 +332,7 @@ export default function AddOrganization() {
                             type="checkbox"
                             checked={selectedCourses.includes(cid)}
                             onChange={() => toggleCourse(cid)}
+                            autoComplete="off"
                           />
                           <span className={s.courseTitle}>{course.title ?? course.name ?? '—'}</span>
                         </label>

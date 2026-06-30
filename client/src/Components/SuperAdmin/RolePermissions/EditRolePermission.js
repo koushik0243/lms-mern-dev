@@ -160,7 +160,7 @@ export default function EditRolePermission() {
       <h1 className={s.pageTitle}>Edit Role Permissions</h1>
       <p className={s.pageSubtitle}>Manage permissions for <strong>{roleName || 'this role'}</strong></p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         {permissions.length > 0 && (
           <>
             <div className={rp.permHeader}>
@@ -171,7 +171,7 @@ export default function EditRolePermission() {
                 )}
               </span>
               <label className={rp.selectAllLabel}>
-                <input type="checkbox" checked={allSelected} onChange={toggleAll} />
+                <input type="checkbox" checked={allSelected} onChange={toggleAll} autoComplete="off" />
                 Select All
               </label>
             </div>
@@ -192,6 +192,7 @@ export default function EditRolePermission() {
                           checked={allGroupChecked}
                           ref={el => { if (el) el.indeterminate = someGroupChecked && !allGroupChecked; }}
                           onChange={() => toggleGroup(key)}
+                          autoComplete="off"
                         />
                         All
                       </label>
@@ -203,6 +204,7 @@ export default function EditRolePermission() {
                             type="checkbox"
                             checked={selectedIds.has(p._id)}
                             onChange={() => togglePerm(p._id)}
+                            autoComplete="off"
                           />
                           <span className={rp.permAction}>{p.action || p.name}</span>
                         </label>

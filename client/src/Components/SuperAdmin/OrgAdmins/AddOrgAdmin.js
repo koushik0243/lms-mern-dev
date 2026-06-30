@@ -24,6 +24,8 @@ export default function AddOrgAdmin() {
   const [roles, setRoles]         = useState([]);
   const [errors, setErrors]       = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [pwReadOnly, setPwReadOnly] = useState(true);
+  const [confirmPwReadOnly, setConfirmPwReadOnly] = useState(true);
 
   useEffect(() => {
     const orgParam = orgId ? `&orgId=${orgId}` : '';
@@ -91,7 +93,7 @@ export default function AddOrgAdmin() {
       <h1 className={s.pageTitle}>Add Admin</h1>
       <p className={s.pageSubtitle}>Create a new organization administrator</p>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="off">
         <div className={s.formCard}>
           <div className={s.formGrid}>
 
@@ -104,6 +106,7 @@ export default function AddOrgAdmin() {
                 placeholder="Full name"
                 value={form.name}
                 onChange={e => setField('name', e.target.value)}
+                autoComplete="off"
               />
               {errors.name && <p className={s.errorMsg}>{errors.name}</p>}
             </div>
@@ -117,6 +120,7 @@ export default function AddOrgAdmin() {
                 placeholder="user@example.com"
                 value={form.email}
                 onChange={e => setField('email', e.target.value)}
+                autoComplete="off"
               />
               {errors.email && <p className={s.errorMsg}>{errors.email}</p>}
             </div>
@@ -130,6 +134,9 @@ export default function AddOrgAdmin() {
                 placeholder="Minimum 6 characters"
                 value={form.password}
                 onChange={e => setField('password', e.target.value)}
+                autoComplete="new-password"
+                readOnly={pwReadOnly}
+                onFocus={() => setPwReadOnly(false)}
               />
               {errors.password && <p className={s.errorMsg}>{errors.password}</p>}
             </div>
@@ -143,6 +150,9 @@ export default function AddOrgAdmin() {
                 placeholder="Re-enter password"
                 value={form.confirm_password}
                 onChange={e => setField('confirm_password', e.target.value)}
+                autoComplete="new-password"
+                readOnly={confirmPwReadOnly}
+                onFocus={() => setConfirmPwReadOnly(false)}
               />
               {errors.confirm_password && <p className={s.errorMsg}>{errors.confirm_password}</p>}
             </div>

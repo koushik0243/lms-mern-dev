@@ -86,6 +86,8 @@ function TypeBadge({ userType }) {
   );
 }
 
+const LIMIT = 50;
+
 /* ── Component ──────────────────────────────────────────────────────────── */
 export default function RolePermissionsList() {
   const router = useRouter();
@@ -95,9 +97,12 @@ export default function RolePermissionsList() {
   const [loading, setLoading]         = useState(true);
   const [search, setSearch]           = useState('');
   const [typeFilter, setTypeFilter]   = useState('');      // '' | 'superadmin' | 'organization'
+  const [page, setPage]               = useState(1);
   const [confirm, setConfirm]         = useState({ show: false, roleId: null });
   const [selected, setSelected]       = useState([]);
   const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [sortKey, setSortKey] = useState('');
+  const [sortDir, setSortDir] = useState('asc');
 
   // Load orgs for name lookup
   useEffect(() => {
@@ -165,6 +170,39 @@ export default function RolePermissionsList() {
     return result;
   }, [grouped, search, typeFilter, orgMap]);
 
+  useEffect(() => { setPage(1); }, [search, typeFilter, sortKey, sortDir]);
+
+  const sorted = sortKey
+    ? [...rows].sort((a, b) => {
+        let av, bv;
+        if (sortKey === 'roleOrgName') {
+          av = (a.roleOrgId ? (orgMap[a.roleOrgId] || '') : '').toLowerCase();
+          bv = (b.roleOrgId ? (orgMap[b.roleOrgId] || '') : '').toLowerCase();
+        } else {
+          av = String(a[sortKey] ?? '').toLowerCase();
+          bv = String(b[sortKey] ?? '').toLowerCase();
+        }
+        if (av < bv) return sortDir === 'asc' ? -1 : 1;
+        if (av > bv) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      })
+    : rows;
+
+  function toggleSort(key) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+  }
+  function sortArrow(key) {
+    if (sortKey !== key) return ' ↕';
+    return sortDir === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  const totalRows  = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / LIMIT));
+  const pagedRows  = sorted.slice((page - 1) * LIMIT, page * LIMIT);
+  const from = totalRows === 0 ? 0 : (page - 1) * LIMIT + 1;
+  const to   = Math.min(page * LIMIT, totalRows);
+
   function doDelete() {
     const { roleId } = confirm;
     setConfirm({ show: false, roleId: null });
@@ -173,7 +211,7 @@ export default function RolePermissionsList() {
       .catch(() => toast.error('Delete failed.'));
   }
 
-  const allIds      = rows.map(r => r.roleId);
+  const allIds      = pagedRows.map(r => r.roleId);
   const allSelected = allIds.length > 0 && allIds.every(id => selected.includes(id));
   const toggleAll   = () => setSelected(allSelected ? [] : allIds);
   const toggleOne   = id => setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -251,9 +289,9 @@ export default function RolePermissionsList() {
               <tr>
                 <th className={s.checkTh}><input type="checkbox" checked={allSelected} onChange={toggleAll} /></th>
                 <th>#</th>
-                <th>Role</th>
-                <th>User Type</th>
-                <th>Organization</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('roleName')}>Role{sortArrow('roleName')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('roleUserType')}>User Type{sortArrow('roleUserType')}</th>
+                <th style={{cursor:'pointer',userSelect:'none',whiteSpace:'nowrap'}} onClick={() => toggleSort('roleOrgName')}>Organization{sortArrow('roleOrgName')}</th>
                 <th>Permissions</th>
                 <th>Action</th>
               </tr>
@@ -263,20 +301,20 @@ export default function RolePermissionsList() {
                 <tr className={s.emptyRow}><td colSpan={7}>Loading…</td></tr>
               ) : rows.length === 0 ? (
                 <tr className={s.emptyRow}><td colSpan={7}>No assignments found.</td></tr>
-              ) : rows.map((row, idx) => {
+              ) : pagedRows.map((row, idx) => {
                 const orgName = row.roleOrgId ? (orgMap[row.roleOrgId] || row.roleOrgId) : '—';
                 return (
-                  <tr key={row.roleId}>
+                  <tr key={row.roleId} style={{ cursor: 'pointer' }} onClick={() => toggleOne(row.roleId)}>
                     <td className={s.checkTd}>
                       <input type="checkbox" checked={selected.includes(row.roleId)} onChange={() => toggleOne(row.roleId)} />
                     </td>
-                    <td>{idx + 1}</td>
+                    <td>{(page - 1) * LIMIT + idx + 1}</td>
                     <td><strong>{row.roleName}</strong></td>
                     <td><TypeBadge userType={row.roleUserType} /></td>
                     <td style={{ color: orgName === '—' ? '#9ca3af' : '#111827', fontSize: 13 }}>{orgName}</td>
                     <td className={s.permCell}>{buildPermissionsLabel(row.permissions)}</td>
                     <td>
-                      <div className={s.actions}>
+                      <div className={s.actions} onClick={e => e.stopPropagation()}>
                         <button
                           className={s.btnEdit}
                           title="Edit"
@@ -300,14 +338,30 @@ export default function RolePermissionsList() {
           </table>
         </div>
 
-        {selected.length > 0 && (
-          <div className={s.bulkBar}>
-            <span>{selected.length} role{selected.length !== 1 ? 's' : ''} selected</span>
-            <button className={s.btnBulkDelete} onClick={handleBulkDelete}>
-              Remove {selected.length} Selected
-            </button>
+        <div className={s.pagination}>
+          <div>
+            {selected.length > 0 ? (
+              <button className={s.btnBulkDelete} onClick={handleBulkDelete}>
+                Remove {selected.length} Selected
+              </button>
+            ) : (
+              <span>{totalRows === 0 ? 'No records' : `Showing ${from}–${to} of ${totalRows}`}</span>
+            )}
           </div>
-        )}
+          <div className={s.paginationBtns}>
+            <button className={s.pageBtn} disabled={page <= 1} onClick={() => setPage(p => p - 1)}>‹</button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+              <button
+                key={p}
+                className={`${s.pageBtn}${page === p ? ` ${s.pageBtnActive}` : ''}`}
+                onClick={() => setPage(p)}
+              >
+                {p}
+              </button>
+            ))}
+            <button className={s.pageBtn} disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>›</button>
+          </div>
+        </div>
       </div>
     </SuperAdminShell>
   );

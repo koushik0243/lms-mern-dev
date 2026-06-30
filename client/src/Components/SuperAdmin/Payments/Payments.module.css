@@ -44,6 +44,13 @@
 .badgeActive   { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; background: #dcfce7; color: #16a34a; }
 .badgeInactive { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; background: #fee2e2; color: #dc2626; }
 
+/* Order status badges (matches order.model.js enum) */
+.badgeSuccess  { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+.badgePending  { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+.badgeFailed   { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.badgeCanceled { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+.badgeRefunded { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+
 .actions { display: flex; gap: 6px; align-items: center; }
 .btnView, .btnEdit, .btnDelete {
   width: 28px; height: 28px; border-radius: 6px; border: none; cursor: pointer;
