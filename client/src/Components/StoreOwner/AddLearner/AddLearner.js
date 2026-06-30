@@ -161,7 +161,15 @@ export default function AddLearnerPage() {
         });
       }
 
-      // Step 3 — save notification preferences
+      // Step 3 — log one credit-used record after learner + course are both saved
+      await apiServiceHandler('POST', 'credit-used/create', {
+        orgId:     resolvedOrgId,
+        learnerId: newUserId,
+        courseId:  selectedCourseId || null,
+        status:    'active',
+      });
+
+      // Step 4 — save notification preferences
       await apiServiceHandler('PUT', `user/admin/update/${newUserId}`, {
         whatsapp_noti: notifyPrefs.whatsapp,
         email_welcome_noti: notifyPrefs.email,

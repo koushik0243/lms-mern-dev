@@ -105,6 +105,15 @@ export default function AssignCoursesPage() {
         userId:         selectedUserId,
         courseId:       selectedCourseId,
       });
+
+      // Log credit usage
+      await apiServiceHandler('POST', 'credit-used/create', {
+        orgId,
+        learnerId: selectedUserId,
+        courseId:  selectedCourseId,
+        status:   'active',
+      });
+
       toast.success('Course assigned — email notification sent');
       setSelectedUserId('');
       setSelectedCourseId('');

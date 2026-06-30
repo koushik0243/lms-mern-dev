@@ -40,6 +40,7 @@ import userRouter from './users/user.controller.js';
 import orderRouter from './orders/order.controller.js';
 import invoiceRouter from './invoices/invoice.controller.js';
 import supportTicketRouter from './support_tickets/support_ticket.controller.js';
+import creditUsedRouter from './credit_used/credit_used.controller.js';
 
 const app = express();
 app.use(express.json());
@@ -96,6 +97,7 @@ app.use('/role-permission', protect, rolePermissionRouter);
 app.use('/order', protect, orderRouter);
 app.use('/invoice', protect, invoiceRouter);
 app.use('/support-ticket', protect, supportTicketRouter);
+app.use('/credit-used', protect, creditUsedRouter);
 app.use('/user', userRouter);
 
 app.use((error, req, res, next) => {
